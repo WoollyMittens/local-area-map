@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>Local Map</title>
+		<style>
+			html { font-family:Sans-Serif; font-size:75%; height:100%; }
+			body { _height:100%; line-height:180%; margin:0; min-height:100%; padding:1%; }
+			.example { max-width:960px; margin:0 auto; padding:0; clear:both; }
+			.example > article, .example > aside { width:98%; padding:2%; }
+			.example-left > article, .example-left > aside { width:48%; padding:1%; float:left; }
+			.example-right > article, .example-right > aside { width:48%; padding:1%; float:right; }
+		</style>
+	</head>
+	<body>
+		<section class="example example-right">
+			<article>
+				<h2>Local Map</h2>
+				<p>Plots GPS data on an interactive offline map of the local area.</p>
+				<p><a class="button downloadButton" href="http://github.com/WoollyMittens/useful-localmap" target="_blank">Download (GitHub)</a></p>
+			</article>
+			<aside>
+
+				<!-- Cut below this -->
+				<style>@import url("./css/localmap.css");</style>
+				<figure class="localmap"></figure>
+				<script src="./lib/gestures.js"></script>
+				<script src="./js/localmap.js"></script>
+				<script>
+				//<!--
+					var localmap = new Localmap({
+						'container': document.querySelector('.localmap'),
+						'markersUrl': 'img/marker-{type}.png',
+						'guideUrl': 'data/milsonspoint-sydneyharbour-manly.js',
+						'routeUrl': 'data/milsonspoint-sydneyharbour-manly.gpx',
+						'mapUrl': 'data/milsonspoint-sydneyharbour-manly.png',
+						'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA'
+					});
+				//-->
+				</script>
+				<!-- Cut above this -->
+
+			</aside>
+		</section>
+	</body>
+</html>
