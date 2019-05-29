@@ -46,17 +46,23 @@ var Localmap = function(config) {
   this.start = function() {
 		var _this = this;
 		setTimeout(function() {
-			_this.config.position.lat = -33.830224;
-			_this.config.position.lon = 151.220423;
+			_this.config.position.lat = -32.9337152839;
+			_this.config.position.lon = 151.720030345;
 			_this.config.position.zoom = 1;
 			_this.update();
 		}, 2000);
     setTimeout(function() {
-			_this.config.position.lat = -33.847691;
-			_this.config.position.lon = 151.231060;
-			_this.config.position.zoom = 2;
+			_this.config.position.lat = -33.01304;
+			_this.config.position.lon = 151.718354;
+			_this.config.position.zoom = 1.5;
 			_this.update();
 		}, 4000);
+    setTimeout(function() {
+			_this.config.position.lat = -32.978277000000006;
+			_this.config.position.lon = 151.708188;
+			_this.config.position.zoom = 2;
+			_this.update();
+		}, 6000);
 	};
 
   this.update = function() {

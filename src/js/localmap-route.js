@@ -26,14 +26,17 @@ Localmap.prototype.Route = function (parent) {
 		var routeData = this.config.routeData;
 		var trackpoints = routeData.getElementsByTagName('trkpt');
 		var trackpoint;
+// TODO: instead of plotting points, try to fit elongated rectangles as lines between points
 		for (var key in trackpoints) {
 			if (!isNaN(key)) {
-				trackpoint = document.createElement('span');
-				trackpoint.setAttribute('class', 'localmap-trackpoint');
-				trackpoint.style.left = (parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * 100 + '%';
-				trackpoint.style.top = (parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * 100 + '%';
-				this.parent.element.appendChild(trackpoint);
-				this.elements.push(trackpoint);
+				if (key%1==0) {
+					trackpoint = document.createElement('span');
+					trackpoint.setAttribute('class', 'localmap-trackpoint');
+					trackpoint.style.left = (parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * 100 + '%';
+					trackpoint.style.top = (parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * 100 + '%';
+					this.parent.element.appendChild(trackpoint);
+					this.elements.push(trackpoint);
+				}
 			}
 		}
 	};

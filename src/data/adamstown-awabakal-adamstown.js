@@ -12,7 +12,7 @@
 	"rain" : false,
 	"fireban" : false,
 	"gps" : "adamstown-awabakal-adamstown",
-	"bounds" : {"_southWest":{"lat":-33.01939338296919,"lng":151.66724705952223},"_northEast":{"lat":-32.9295317830766,"lng":151.7771103407722}},
+	"bounds" : {"_southWest":{"lat":-33.02708758002872,"lng":151.688232421875},"_northEast":{"lat":-32.9164853473144,"lng":151.754150390625}},
 	"markers" : {
 		"start" : {
 			"location" : "Adamstown",

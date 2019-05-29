@@ -39,11 +39,11 @@
 	&-trackpoint {
 		display: block;
 		position: absolute;
-		width: 4px;
-		height: 4px;
+		width: 6px;
+		height: 6px;
 		border-radius: 50%;
-		background-color: rgba(255,128,0,0.3);
-		margin: -2px 0 0 -2px;
+		background-color: rgba(255,128,0,0.7);
+		margin: -3px 0 0 -3px;
 		z-index: 1;
 	}
 
