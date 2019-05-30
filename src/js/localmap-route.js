@@ -15,39 +15,49 @@ Localmap.prototype.Route = function (parent) {
 		routeXhr.addEventListener('load', this.onRouteLoaded.bind(this));
 		routeXhr.open('GET', this.config.routeUrl, true);
 		routeXhr.send();
+		// create a canvas
+		this.canvas = document.createElement('canvas');
+		this.canvas.setAttribute('class', 'localmap-trackpoints')
+		this.parent.element.appendChild(this.canvas);
 	};
 
 	this.update = function() {
 		console.log('route.update');
+		// retard the update
+		window.cancelAnimationFrame(this.animationFrame);
+		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
 	};
 
-	this.drawRoute = function() {
+	this.redraw = function() {
+		// adjust the height of the canvas
+		this.canvas.width = this.parent.element.offsetWidth;
+		this.canvas.height = this.parent.element.offsetHeight;
 		// position every trackpoint in the route
 		var routeData = this.config.routeData;
 		var trackpoints = routeData.getElementsByTagName('trkpt');
-		var trackpoint;
-// TODO: instead of plotting points, try to fit elongated rectangles as lines between points
+		var ctx = this.canvas.getContext('2d');
+		// (re)draw the route
+		var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
+		ctx.clearRect(0, 0, w, h);
+		ctx.lineWidth = 4 / z;
+		ctx.strokeStyle = 'orange';
+		ctx.beginPath();
 		for (var key in trackpoints) {
-			if (!isNaN(key)) {
-				if (key%1==0) {
-					trackpoint = document.createElement('span');
-					trackpoint.setAttribute('class', 'localmap-trackpoint');
-					trackpoint.style.left = (parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * 100 + '%';
-					trackpoint.style.top = (parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * 100 + '%';
-					this.parent.element.appendChild(trackpoint);
-					this.elements.push(trackpoint);
-				}
+			if (!isNaN(key) && key % 1 == 0) {
+				if (x = null) ctx.moveTo(x, y);
+				x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
+				y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+				ctx.lineTo(x, y);
 			}
 		}
-	};
+		ctx.stroke();
+	}
 
 	// EVENTS
 
 	this.onRouteLoaded = function(evt) {
 		// decode the xml data
 		this.config.routeData = evt.target.responseXML;
-		// add the trackpoints from the route
-		this.drawRoute();
 	};
 
 	this.start();

@@ -18,13 +18,17 @@
 			"location" : "Adamstown",
 			"type" : "train",
 			"icon" : "./inc/img/marker-train.png",
-			"description" : "Get the train to Adamstown using <a href=\"https://transportnsw.info/trip#/?to=Adamstown\">transportnsw.info</a>."
+			"description" : "Get the train to Adamstown using <a href=\"https://transportnsw.info/trip#/?to=Adamstown\">transportnsw.info</a>.",
+			"lon": 151.720030345,
+	    "lat": -32.9337152839
 		},
 		"end" : {
 			"location" : "Adamstown",
 			"type" : "train",
 			"icon" : "./inc/img/marker-train.png",
-			"description" : "Plan your return trip from Adamstown at <a href=\"https://transportnsw.info/trip#/?from=Adamstown\">transportnsw.info</a>."
+			"description" : "Plan your return trip from Adamstown at <a href=\"https://transportnsw.info/trip#/?from=Adamstown\">transportnsw.info</a>.",
+			"lon": 151.7206018232,
+			"lat": -32.9336548503
 		},
 		"kioska" : {
 			"type" : "kiosk",

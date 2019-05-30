@@ -20,7 +20,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		console.log('background.update');
 	};
 
-	this.drawBackground = function() {
+	this.redraw = function() {
 		var container = this.config.container;
 		var element = this.element;
 		var min = this.config.minimum;
@@ -47,7 +47,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		min.zoom = Math.max(container.offsetWidth / this.element.naturalWidth, container.offsetHeight / this.element.naturalHeight);
 		max.zoom = 2;
 		// center the background
-		this.drawBackground();
+		this.redraw();
 	};
 
 	this.start();

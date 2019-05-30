@@ -20,6 +20,16 @@ Localmap.prototype.Canvas = function (parent, onComplete) {
 
 	this.update = function() {
 		console.log('canvas.update');
+		// retard the update
+		window.cancelAnimationFrame(this.animationFrame);
+		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+		// update all sub-components
+    for (var key in this.components)
+      if (this.components[key].update)
+        this.components[key].update(this.config);
+	};
+
+	this.redraw = function() {
 		var container = this.config.container;
 		var element = this.element;
 		var min = this.config.minimum;
@@ -39,10 +49,6 @@ Localmap.prototype.Canvas = function (parent, onComplete) {
 		// position the background
 		element.style.transition = 'transform ease 300ms';
 		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
-		// update all sub-components
-    for (var key in this.components)
-      if (this.components[key].update)
-        this.components[key].update(this.config);
 	};
 
 	// CLASSES

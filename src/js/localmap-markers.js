@@ -19,6 +19,12 @@ Localmap.prototype.Markers = function (parent) {
 
 	this.update = function() {
 		console.log('markers.update');
+		// retard the update
+		window.cancelAnimationFrame(this.animationFrame);
+		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+	};
+
+	this.redraw = function() {
 		// resize the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
@@ -26,7 +32,7 @@ Localmap.prototype.Markers = function (parent) {
 		}
 	};
 
-	this.drawGuide = function() {
+	this.addGuide = function() {
 		var config = this.config;
 		var guideData = this.config.guideData;
 		// store the initial position
@@ -64,7 +70,7 @@ Localmap.prototype.Markers = function (parent) {
 		max.lon = guideData.bounds._northEast.lng;
 		max.lat = guideData.bounds._southWest.lat;
 		// add the markers from the guide
-		this.drawGuide();
+		this.addGuide();
 	};
 
 	this.start();

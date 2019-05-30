@@ -17,6 +17,12 @@ Localmap.prototype.Scale = function (parent) {
 
 	this.update = function() {
 		console.log('scale.update');
+		// retard the update
+		window.cancelAnimationFrame(this.animationFrame);
+		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+	};
+
+	this.redraw = function() {
 		// how big is the map in kilometres along the bottom
 		var mapSize = this.distance(
 			{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
