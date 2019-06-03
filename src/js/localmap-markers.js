@@ -44,19 +44,29 @@ Localmap.prototype.Markers = function (parent) {
 
 	this.addMarker = function(key) {
 		var markerData = this.config.guideData.markers[key];
-		var markerElement = new Image();
 		var min = this.config.minimum;
 		var max = this.config.maximum;
-		markerElement.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
-		markerElement.setAttribute('title', markerData.description || '');
-		markerElement.setAttribute('class', 'localmap-marker');
-		markerElement.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
-		markerElement.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
-		this.parent.element.appendChild(markerElement);
-		this.elements.push(markerElement);
+		// don't add photo waypoints
+		if (!markerData.photo) {
+			markerData.element = new Image();
+			markerData.element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
+			markerData.element.setAttribute('alt', '');
+			markerData.element.setAttribute('class', 'localmap-marker');
+			markerData.element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
+			markerData.element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+			markerData.element.style.cursor = (markerData.description) ? 'pointer' : null;
+			markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
+			this.parent.element.appendChild(markerData.element);
+			this.elements.push(markerData.element);
+		}
 	}
 
 	// EVENTS
+
+	this.onMarkerClicked = function(markerData, evt) {
+		console.log('marker clicked', markerData);
+		// TODO: how to relay the marker click to the top level (popup) component
+	};
 
 	this.onGuideLoaded = function(evt) {
 		var min = this.config.minimum;
@@ -65,10 +75,10 @@ Localmap.prototype.Markers = function (parent) {
 		this.config.guideData = JSON.parse(evt.target.response);
 		// extract the interpolation limits
 		var guideData = this.config.guideData;
-		min.lon = guideData.bounds._southWest.lng;
-		min.lat = guideData.bounds._northEast.lat;
-		max.lon = guideData.bounds._northEast.lng;
-		max.lat = guideData.bounds._southWest.lat;
+		min.lon = guideData.bounds.west;
+		min.lat = guideData.bounds.north;
+		max.lon = guideData.bounds.east;
+		max.lat = guideData.bounds.south;
 		// add the markers from the guide
 		this.addGuide();
 	};
