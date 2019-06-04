@@ -1,11 +1,12 @@
 // extend the class
-Localmap.prototype.Markers = function (parent) {
+Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 
 	// PROPERTIES
 
 	this.parent = parent;
 	this.config = parent.config;
 	this.elements = [];
+	this.onMarkerClicked = onMarkerClicked;
 
 	// METHODS
 
@@ -44,29 +45,38 @@ Localmap.prototype.Markers = function (parent) {
 
 	this.addMarker = function(key) {
 		var markerData = this.config.guideData.markers[key];
-		var min = this.config.minimum;
-		var max = this.config.maximum;
-		// don't add photo waypoints
-		if (!markerData.photo) {
-			markerData.element = new Image();
-			markerData.element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
-			markerData.element.setAttribute('alt', '');
-			markerData.element.setAttribute('class', 'localmap-marker');
-			markerData.element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
-			markerData.element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
-			markerData.element.style.cursor = (markerData.description) ? 'pointer' : null;
-			markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
-			this.parent.element.appendChild(markerData.element);
-			this.elements.push(markerData.element);
-		}
+		// add either a landmark or a waypoint to the map
+		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
+		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
+		this.parent.element.appendChild(markerData.element);
+		this.elements.push(markerData.element);
 	}
 
-	// EVENTS
-
-	this.onMarkerClicked = function(markerData, evt) {
-		console.log('marker clicked', markerData);
-		// TODO: how to relay the marker click to the top level (popup) component
+	this.addLandmark = function(markerData) {
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		var element = document.createElement('span');
+		element.setAttribute('class', 'localmap-waypoint');
+		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
+		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		element.style.cursor = 'pointer';
+		return element;
 	};
+
+	this.addWaypoint = function(markerData) {
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		var element = new Image();
+		element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
+		element.setAttribute('alt', '');
+		element.setAttribute('class', 'localmap-marker');
+		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
+		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		element.style.cursor = (markerData.description) ? 'pointer' : null;
+		return element;
+	};
+
+	// EVENTS
 
 	this.onGuideLoaded = function(evt) {
 		var min = this.config.minimum;

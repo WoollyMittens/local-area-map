@@ -46,22 +46,13 @@ var Localmap = function(config) {
   this.start = function() {
 		var _this = this;
 		setTimeout(function() {
-			_this.config.position.lat = -32.9337152839;
-			_this.config.position.lon = 151.720030345;
-			_this.config.position.zoom = 1;
-			_this.update();
+      _this.focus(151.720030345, -32.9337152839, 1);
 		}, 2000);
     setTimeout(function() {
-			_this.config.position.lat = -33.01304;
-			_this.config.position.lon = 151.718354;
-			_this.config.position.zoom = 1.5;
-			_this.update();
+      _this.focus(151.718354, -33.01304, 1.5);
 		}, 4000);
     setTimeout(function() {
-			_this.config.position.lat = -32.978277000000006;
-			_this.config.position.lon = 151.708188;
-			_this.config.position.zoom = 2;
-			_this.update();
+      _this.focus(151.708188, -32.978277000000006, 2);
 		}, 6000);
 	};
 
@@ -73,6 +64,19 @@ var Localmap = function(config) {
         this.components[key].update(this.config);
   };
 
+  this.focus = function(lon, lat, zoom) {
+    console.log('focus on:', lon, lat, zoom);
+    this.config.position.lon = lon;
+    this.config.position.lat = lat;
+    this.config.position.zoom = zoom;
+    this.update();
+  };
+
+  this.describe = function(markerdata) {
+    // TODO: a popup describing the markerdata
+    console.log('describe:', markerdata);
+  };
+
   this.end = function() {
     // release the container
     this.element.innerHTML = '';
@@ -81,7 +85,7 @@ var Localmap = function(config) {
   // CLASSES
 
   this.components = {
-    canvas: new this.Canvas(this, this.update.bind(this)),
+    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this)
@@ -105,6 +109,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = new Image();
+	this.onComplete = onComplete;
 
 	// METHODS
 
@@ -132,8 +137,6 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
 		// insert the image into the canvas
 		this.parent.element.appendChild(this.element);
-		// update everything
-		onComplete();
 	};
 
 	// EVENTS
@@ -147,6 +150,8 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		max.zoom = 2;
 		// center the background
 		this.redraw();
+		// resolve the promise
+		onComplete();
 	};
 
 	this.start();
@@ -154,7 +159,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 };
 
 // extend the class
-Localmap.prototype.Canvas = function (parent, onComplete) {
+Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClicked) {
 
 	// PROPERTIES
 
@@ -209,8 +214,8 @@ Localmap.prototype.Canvas = function (parent, onComplete) {
 	// CLASSES
 
   this.components = {
-		background: new parent.Background(this, onComplete),
-		markers: new parent.Markers(this),
+		background: new parent.Background(this, onBackgroundComplete),
+		markers: new parent.Markers(this, onMarkerClicked),
 		route: new parent.Route(this),
 		location: new parent.Location(this)
   };
@@ -345,13 +350,14 @@ Localmap.prototype.Location = function (parent) {
 };
 
 // extend the class
-Localmap.prototype.Markers = function (parent) {
+Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 
 	// PROPERTIES
 
 	this.parent = parent;
 	this.config = parent.config;
 	this.elements = [];
+	this.onMarkerClicked = onMarkerClicked;
 
 	// METHODS
 
@@ -390,29 +396,38 @@ Localmap.prototype.Markers = function (parent) {
 
 	this.addMarker = function(key) {
 		var markerData = this.config.guideData.markers[key];
-		var min = this.config.minimum;
-		var max = this.config.maximum;
-		// don't add photo waypoints
-		if (!markerData.photo) {
-			markerData.element = new Image();
-			markerData.element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
-			markerData.element.setAttribute('alt', '');
-			markerData.element.setAttribute('class', 'localmap-marker');
-			markerData.element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
-			markerData.element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
-			markerData.element.style.cursor = (markerData.description) ? 'pointer' : null;
-			markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
-			this.parent.element.appendChild(markerData.element);
-			this.elements.push(markerData.element);
-		}
+		// add either a landmark or a waypoint to the map
+		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
+		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
+		this.parent.element.appendChild(markerData.element);
+		this.elements.push(markerData.element);
 	}
 
-	// EVENTS
-
-	this.onMarkerClicked = function(markerData, evt) {
-		console.log('marker clicked', markerData);
-		// TODO: how to relay the marker click to the top level (popup) component
+	this.addLandmark = function(markerData) {
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		var element = document.createElement('span');
+		element.setAttribute('class', 'localmap-waypoint');
+		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
+		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		element.style.cursor = 'pointer';
+		return element;
 	};
+
+	this.addWaypoint = function(markerData) {
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		var element = new Image();
+		element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
+		element.setAttribute('alt', '');
+		element.setAttribute('class', 'localmap-marker');
+		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
+		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		element.style.cursor = (markerData.description) ? 'pointer' : null;
+		return element;
+	};
+
+	// EVENTS
 
 	this.onGuideLoaded = function(evt) {
 		var min = this.config.minimum;
@@ -452,7 +467,7 @@ Localmap.prototype.Route = function (parent) {
 		routeXhr.send();
 		// create a canvas
 		this.canvas = document.createElement('canvas');
-		this.canvas.setAttribute('class', 'localmap-trackpoints')
+		this.canvas.setAttribute('class', 'localmap-route')
 		this.parent.element.appendChild(this.canvas);
 	};
 

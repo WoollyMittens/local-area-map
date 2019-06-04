@@ -6,6 +6,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = new Image();
+	this.onComplete = onComplete;
 
 	// METHODS
 
@@ -33,8 +34,6 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
 		// insert the image into the canvas
 		this.parent.element.appendChild(this.element);
-		// update everything
-		onComplete();
 	};
 
 	// EVENTS
@@ -48,6 +47,8 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		max.zoom = 2;
 		// center the background
 		this.redraw();
+		// resolve the promise
+		onComplete();
 	};
 
 	this.start();

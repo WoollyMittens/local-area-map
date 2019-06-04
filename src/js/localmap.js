@@ -46,22 +46,13 @@ var Localmap = function(config) {
   this.start = function() {
 		var _this = this;
 		setTimeout(function() {
-			_this.config.position.lat = -32.9337152839;
-			_this.config.position.lon = 151.720030345;
-			_this.config.position.zoom = 1;
-			_this.update();
+      _this.focus(151.720030345, -32.9337152839, 1);
 		}, 2000);
     setTimeout(function() {
-			_this.config.position.lat = -33.01304;
-			_this.config.position.lon = 151.718354;
-			_this.config.position.zoom = 1.5;
-			_this.update();
+      _this.focus(151.718354, -33.01304, 1.5);
 		}, 4000);
     setTimeout(function() {
-			_this.config.position.lat = -32.978277000000006;
-			_this.config.position.lon = 151.708188;
-			_this.config.position.zoom = 2;
-			_this.update();
+      _this.focus(151.708188, -32.978277000000006, 2);
 		}, 6000);
 	};
 
@@ -73,6 +64,19 @@ var Localmap = function(config) {
         this.components[key].update(this.config);
   };
 
+  this.focus = function(lon, lat, zoom) {
+    console.log('focus on:', lon, lat, zoom);
+    this.config.position.lon = lon;
+    this.config.position.lat = lat;
+    this.config.position.zoom = zoom;
+    this.update();
+  };
+
+  this.describe = function(markerdata) {
+    // TODO: a popup describing the markerdata
+    console.log('describe:', markerdata);
+  };
+
   this.end = function() {
     // release the container
     this.element.innerHTML = '';
@@ -81,7 +85,7 @@ var Localmap = function(config) {
   // CLASSES
 
   this.components = {
-    canvas: new this.Canvas(this, this.update.bind(this)),
+    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this)

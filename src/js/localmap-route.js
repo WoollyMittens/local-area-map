@@ -17,7 +17,7 @@ Localmap.prototype.Route = function (parent) {
 		routeXhr.send();
 		// create a canvas
 		this.canvas = document.createElement('canvas');
-		this.canvas.setAttribute('class', 'localmap-trackpoints')
+		this.canvas.setAttribute('class', 'localmap-route')
 		this.parent.element.appendChild(this.canvas);
 	};
 
