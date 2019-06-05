@@ -14,6 +14,7 @@ var Localmap = function(config) {
   this.config = {
     'container': null,
     'canvasElement': null,
+    'assetsUrl': null,
     'markersUrl': null,
     'guideUrl': null,
     'guideData': null,
@@ -73,13 +74,13 @@ var Localmap = function(config) {
   };
 
   this.describe = function(markerdata) {
-    // TODO: a popup describing the markerdata
-    console.log('describe:', markerdata);
+    // show a popup describing the markerdata
+    this.components.modal.show(markerdata);
   };
 
   this.end = function() {
     // release the container
-    this.element.innerHTML = '';
+    this.container.innerHTML = '';
   };
 
   // CLASSES
@@ -88,7 +89,8 @@ var Localmap = function(config) {
     canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
-    credits: new this.Credits(this)
+    credits: new this.Credits(this),
+    modal: new this.Modal(this)
   };
 
   // EVENTS
