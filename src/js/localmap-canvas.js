@@ -19,10 +19,8 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 	};
 
 	this.update = function() {
-		console.log('canvas.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+		// redraw this component
+		this.redraw();
 		// update all sub-components
     for (var key in this.components)
       if (this.components[key].update)
@@ -44,8 +42,8 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		var offsetX = -centerX * zoom + container.offsetWidth / 2;
 		var offsetY = -centerY * zoom + container.offsetHeight / 2;
 		// apply the limits
-		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom * 0.99);
-		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom * 0.99);
+		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom);
+		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom);
 		// position the background
 		if (this.config.useTransitions) element.style.transition = 'transform ease 300ms';
 		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';

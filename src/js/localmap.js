@@ -61,7 +61,12 @@ var Localmap = function(config) {
 	};
 
   this.update = function() {
-		console.log('parent.update');
+    // retard the update
+		window.cancelAnimationFrame(this.animationFrame);
+		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+  };
+
+  this.redraw = function() {
     // update all components
     for (var key in this.components)
       if (this.components[key].update)
@@ -69,7 +74,6 @@ var Localmap = function(config) {
   };
 
   this.focus = function(lon, lat, zoom, smoothly) {
-    console.log('focus on:', lon, lat, zoom);
     // try to keep the focus within bounds
     this.config.useTransitions = smoothly;
     this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon), this.config.minimum.lon);

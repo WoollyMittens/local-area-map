@@ -31,9 +31,7 @@ Localmap.prototype.Modal = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
-	this.update = function() {
-		console.log('modal.update');
-	};
+	this.update = function() {};
 
 	this.show = function(markerData) {
 		// display the photo if available

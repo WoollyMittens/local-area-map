@@ -16,9 +16,7 @@ Localmap.prototype.Credits = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
-	this.update = function() {
-		console.log('credits.update');
-	};
+	this.update = function() {};
 
 	// EVENTS
 

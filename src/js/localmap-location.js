@@ -22,13 +22,6 @@ Localmap.prototype.Location = function (parent) {
 	};
 
 	this.update = function() {
-		console.log('location.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
-	};
-
-	this.redraw = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
 		this.element.style.transform = 'scale(' + scale + ')';

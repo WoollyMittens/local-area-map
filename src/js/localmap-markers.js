@@ -7,6 +7,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.config = parent.config;
 	this.elements = [];
 	this.onMarkerClicked = onMarkerClicked;
+	this.zoom = null;
 
 	// METHODS
 
@@ -19,18 +20,16 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.update = function() {
-		console.log('markers.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
-	};
-
-	this.redraw = function() {
-		// resize the markers according to scale
-		var scale = 1 / this.config.position.zoom;
-		for (var key in this.elements) {
-			this.elements[key].style.transform = 'scale(' + scale + ')'
+		// only redraw if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) {
+			// resize the markers according to scale
+			var scale = 1 / this.config.position.zoom;
+			for (var key in this.elements) {
+				this.elements[key].style.transform = 'scale(' + scale + ')'
+			}
 		}
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
 	};
 
 	this.addGuide = function() {

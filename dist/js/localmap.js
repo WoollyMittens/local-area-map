@@ -61,7 +61,12 @@ var Localmap = function(config) {
 	};
 
   this.update = function() {
-		console.log('parent.update');
+    // retard the update
+		window.cancelAnimationFrame(this.animationFrame);
+		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+  };
+
+  this.redraw = function() {
     // update all components
     for (var key in this.components)
       if (this.components[key].update)
@@ -69,7 +74,6 @@ var Localmap = function(config) {
   };
 
   this.focus = function(lon, lat, zoom, smoothly) {
-    console.log('focus on:', lon, lat, zoom);
     // try to keep the focus within bounds
     this.config.useTransitions = smoothly;
     this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon), this.config.minimum.lon);
@@ -127,9 +131,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.element.setAttribute('src', this.config.mapUrl);
 	};
 
-	this.update = function() {
-		console.log('background.update');
-	};
+	this.update = function() {};
 
 	this.redraw = function() {
 		var container = this.config.container;
@@ -189,10 +191,8 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 	};
 
 	this.update = function() {
-		console.log('canvas.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
+		// redraw this component
+		this.redraw();
 		// update all sub-components
     for (var key in this.components)
       if (this.components[key].update)
@@ -214,8 +214,8 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		var offsetX = -centerX * zoom + container.offsetWidth / 2;
 		var offsetY = -centerY * zoom + container.offsetHeight / 2;
 		// apply the limits
-		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom * 0.99);
-		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom * 0.99);
+		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom);
+		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom);
 		// position the background
 		if (this.config.useTransitions) element.style.transition = 'transform ease 300ms';
 		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
@@ -260,15 +260,10 @@ Localmap.prototype.Controls = function (parent) {
 	};
 
 	// TODO: buttons to incrementally zoom in, zoom out, move north, move south, move east, move west.
-	
-	// TODO: mouse wheel to zoom
 
-	this.update = function() {
-		console.log('controls.update');
-	};
+	this.update = function() {};
 
 	this.coasting = function() {
-		console.log('coasting', this.inertia, this.config.position.lon);
 		// move the map according to the inertia
 		this.parent.focus(
 			this.config.position.lon + (this.config.maximum.lon - this.config.minimum.lon) * -this.inertia.x,
@@ -294,39 +289,56 @@ Localmap.prototype.Controls = function (parent) {
 		this.inertia.y = 0;
 		this.inertia.z = 0;
 		// store the initial touch(es)
-		this.touches = evt.touches;
+		this.touches = evt.touches || [{ 'clientX': evt.clientX, 'clientY': evt.clientY }];
 	};
 
 	this.moveInteraction = function(evt) {
 		evt.preventDefault();
-		var width = this.config.canvasElement.offsetWidth * this.config.position.zoom;
-		var height = this.config.canvasElement.offsetHeight * this.config.position.zoom;
-		var prev = this.touches;
-		var next = evt.touches;
-		var nextX = (next.length > 1) ? (next[0].clientX + next[1].clientX) / 2 : next[0].clientX;
-		var nextY = (next.length > 1) ? (next[0].clientY + next[1].clientY) / 2 : next[0].clientY;
-		var prevX = (prev.length > 1) ? (prev[0].clientX + prev[1].clientX) / 2 : prev[0].clientX;
-		var prevY = (prev.length > 1) ? (prev[0].clientY + prev[1].clientY) / 2 : prev[0].clientY;
-		// update the inertia
-		this.inertia.x = (nextX - prevX) / width;
-		this.inertia.y = (nextY - prevY) / height;
-		this.inertia.z = (next.length > 1 && prev.length > 1) ? ((next[0].clientX - next[1].clientX) - (prev[0].clientX - prev[1].clientX)) / width + ((next[0].clientY - next[1].clientY) - (prev[0].clientY - prev[1].clientY)) / height : 0;
-		// start coasting on inertia
-		this.coasting();
-		// store the touches
-		this.touches = evt.touches;
+		// retrieve the current and previous touches
+		var touches = evt.touches || [{ 'clientX': evt.clientX, 'clientY': evt.clientY }];
+		var previous = this.touches;
+		// if there is interaction
+		if (previous) {
+			// calculate the interaction points
+			var width = this.config.canvasElement.offsetWidth * this.config.position.zoom;
+			var height = this.config.canvasElement.offsetHeight * this.config.position.zoom;
+			var nextX = (touches.length > 1) ? (touches[0].clientX + touches[1].clientX) / 2 : touches[0].clientX;
+			var nextY = (touches.length > 1) ? (touches[0].clientY + touches[1].clientY) / 2 : touches[0].clientY;
+			var prevX = (previous.length > 1) ? (previous[0].clientX + previous[1].clientX) / 2 : previous[0].clientX;
+			var prevY = (previous.length > 1) ? (previous[0].clientY + previous[1].clientY) / 2 : previous[0].clientY;
+			// update the inertia
+			this.inertia.x = (nextX - prevX) / width;
+			this.inertia.y = (nextY - prevY) / height;
+			this.inertia.z = (touches.length > 1 && previous.length > 1) ? ((touches[0].clientX - touches[1].clientX) - (previous[0].clientX - previous[1].clientX)) / width + ((touches[0].clientY - touches[1].clientY) - (previous[0].clientY - previous[1].clientY)) / height : 0;
+			// start coasting on inertia
+			this.coasting();
+			// store the touches
+			this.touches = touches;
+		}
 	};
 
 	this.endInteraction = function(evt) {
 		// clear the interaction
 		this.touches = null;
-		// coast on inertia
 	};
 
-	this.cancelInteraction = function(evt) {
+	this.wheelInteraction = function(evt) {
+		evt.preventDefault();
+		// update the inertia
+		this.inertia.z -= evt.deltaY / 5000;
+		// start coasting on inertia
+		this.coasting();
 	};
+
+	this.cancelInteraction = function(evt) {};
 
 	// EVENTS
+
+	this.config.container.addEventListener('mousedown', this.startInteraction.bind(this));
+	this.config.container.addEventListener('mousemove', this.moveInteraction.bind(this));
+	this.config.container.addEventListener('mouseup', this.endInteraction.bind(this));
+	this.config.container.addEventListener('wheel', this.wheelInteraction.bind(this));
+
 
 	this.config.container.addEventListener('touchstart', this.startInteraction.bind(this));
 	this.config.container.addEventListener('touchmove', this.moveInteraction.bind(this));
@@ -355,9 +367,7 @@ Localmap.prototype.Credits = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
-	this.update = function() {
-		console.log('credits.update');
-	};
+	this.update = function() {};
 
 	// EVENTS
 
@@ -389,13 +399,6 @@ Localmap.prototype.Location = function (parent) {
 	};
 
 	this.update = function() {
-		console.log('location.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
-	};
-
-	this.redraw = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
 		this.element.style.transform = 'scale(' + scale + ')';
@@ -434,6 +437,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.config = parent.config;
 	this.elements = [];
 	this.onMarkerClicked = onMarkerClicked;
+	this.zoom = null;
 
 	// METHODS
 
@@ -446,18 +450,16 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.update = function() {
-		console.log('markers.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
-	};
-
-	this.redraw = function() {
-		// resize the markers according to scale
-		var scale = 1 / this.config.position.zoom;
-		for (var key in this.elements) {
-			this.elements[key].style.transform = 'scale(' + scale + ')'
+		// only redraw if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) {
+			// resize the markers according to scale
+			var scale = 1 / this.config.position.zoom;
+			for (var key in this.elements) {
+				this.elements[key].style.transform = 'scale(' + scale + ')'
+			}
 		}
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
 	};
 
 	this.addGuide = function() {
@@ -556,9 +558,7 @@ Localmap.prototype.Modal = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
-	this.update = function() {
-		console.log('modal.update');
-	};
+	this.update = function() {};
 
 	this.show = function(markerData) {
 		// display the photo if available
@@ -598,6 +598,7 @@ Localmap.prototype.Route = function (parent) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.elements = [];
+	this.zoom = null;
 
 	// METHODS
 
@@ -614,36 +615,34 @@ Localmap.prototype.Route = function (parent) {
 	};
 
 	this.update = function() {
-		console.log('route.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
-	};
-
-	this.redraw = function() {
-		// adjust the height of the canvas
-		this.canvas.width = this.parent.element.offsetWidth;
-		this.canvas.height = this.parent.element.offsetHeight;
-		// position every trackpoint in the route
-		var routeData = this.config.routeData;
-		var trackpoints = routeData.getElementsByTagName('trkpt');
-		var ctx = this.canvas.getContext('2d');
-		// (re)draw the route
-		var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
-		ctx.clearRect(0, 0, w, h);
-		ctx.lineWidth = 4 / z;
-		ctx.strokeStyle = 'orange';
-		ctx.beginPath();
-		for (var key in trackpoints) {
-			if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
-				if (x = null) ctx.moveTo(x, y);
-				x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
-				y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
-				ctx.lineTo(x, y);
+		// only redraw if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) {
+			// adjust the height of the canvas
+			this.canvas.width = this.parent.element.offsetWidth;
+			this.canvas.height = this.parent.element.offsetHeight;
+			// position every trackpoint in the route
+			var routeData = this.config.routeData;
+			var trackpoints = routeData.getElementsByTagName('trkpt');
+			var ctx = this.canvas.getContext('2d');
+			// (re)draw the route
+			var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
+			ctx.clearRect(0, 0, w, h);
+			ctx.lineWidth = 4 / z;
+			ctx.strokeStyle = 'orange';
+			ctx.beginPath();
+			for (var key in trackpoints) {
+				if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
+					if (x = null) ctx.moveTo(x, y);
+					x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
+					y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+					ctx.lineTo(x, y);
+				}
 			}
+			ctx.stroke();
 		}
-		ctx.stroke();
-	}
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
+	};
 
 	// EVENTS
 
@@ -664,6 +663,7 @@ Localmap.prototype.Scale = function (parent) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = document.createElement('div');
+	this.zoom = null;
 
 	// METHODS
 
@@ -674,35 +674,33 @@ Localmap.prototype.Scale = function (parent) {
 	};
 
 	this.update = function() {
-		console.log('scale.update');
-		// retard the update
-		window.cancelAnimationFrame(this.animationFrame);
-		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
-	};
-
-	this.redraw = function() {
-		// how big is the map in kilometres along the bottom
-		var mapSize = this.distance(
-			{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
-			{'lon': this.config.maximum.lon, 'lat': this.config.maximum.lat}
-		);
-		// what portion of that is in the container
-		var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
-		// use a fraction of that as the scale
-		var scaleSize = visible * mapSize / 6;
-		// round to the nearest increment
-		var scale = 50, label = '50km';
-		if (scaleSize < 10) { scale = 10; label = '10km' }
-		if (scaleSize < 5) { scale = 5; label = '5km' }
-		if (scaleSize < 2) { scale = 2; label = '2km' }
-		if (scaleSize < 1) { scale = 1; label = '1km' }
-		if (scaleSize < 0.5) { scale = 0.5; label = '500m' }
-		if (scaleSize < 0.2) { scale = 0.2; label = '200m' }
-		if (scaleSize < 0.1) { scale = 0.1; label = '100m' }
-		// size the scale to the increment
-		this.element.style.width = (scale / visible / mapSize * 100) + '%';
-		// fill the scale with the increment
-		this.element.innerHTML = label;
+		// only redraw if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) {
+			// how big is the map in kilometres along the bottom
+			var mapSize = this.distance(
+				{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
+				{'lon': this.config.maximum.lon, 'lat': this.config.maximum.lat}
+			);
+			// what portion of that is in the container
+			var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
+			// use a fraction of that as the scale
+			var scaleSize = visible * mapSize / 6;
+			// round to the nearest increment
+			var scale = 50, label = '50km';
+			if (scaleSize < 10) { scale = 10; label = '10km' }
+			if (scaleSize < 5) { scale = 5; label = '5km' }
+			if (scaleSize < 2) { scale = 2; label = '2km' }
+			if (scaleSize < 1) { scale = 1; label = '1km' }
+			if (scaleSize < 0.5) { scale = 0.5; label = '500m' }
+			if (scaleSize < 0.2) { scale = 0.2; label = '200m' }
+			if (scaleSize < 0.1) { scale = 0.1; label = '100m' }
+			// size the scale to the increment
+			this.element.style.width = (scale / visible / mapSize * 100) + '%';
+			// fill the scale with the increment
+			this.element.innerHTML = label;
+		}
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
 	};
 
 	this.distance = function(A, B) {

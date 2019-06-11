@@ -17,9 +17,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.element.setAttribute('src', this.config.mapUrl);
 	};
 
-	this.update = function() {
-		console.log('background.update');
-	};
+	this.update = function() {};
 
 	this.redraw = function() {
 		var container = this.config.container;
