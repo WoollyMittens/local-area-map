@@ -25,7 +25,7 @@ Localmap.prototype.Controls = function (parent) {
 		this.parent.focus(
 			this.config.position.lon + (this.config.maximum.lon - this.config.minimum.lon) * -this.inertia.x,
 			this.config.position.lat + (this.config.maximum.lat - this.config.minimum.lat) * -this.inertia.y,
-			this.config.position.zoom + (this.config.maximum.zoom - this.config.minimum.zoom) * -this.inertia.z
+			this.config.position.zoom + (this.config.maximum.zoom - this.config.minimum.zoom) * this.inertia.z
 		);
 		// if the inertia is above a certain level
 		if (Math.abs(this.inertia.x) > 0.0001 || Math.abs(this.inertia.y) > 0.0001 || Math.abs(this.inertia.z) > 0.0001) {
@@ -82,7 +82,7 @@ Localmap.prototype.Controls = function (parent) {
 	this.wheelInteraction = function(evt) {
 		evt.preventDefault();
 		// update the inertia
-		this.inertia.z -= evt.deltaY / 5000;
+		this.inertia.z += evt.deltaY / 5000;
 		// start coasting on inertia
 		this.coasting();
 	};
