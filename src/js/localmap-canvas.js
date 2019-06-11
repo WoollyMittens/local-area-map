@@ -47,7 +47,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom * 0.99);
 		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom * 0.99);
 		// position the background
-		element.style.transition = 'transform ease 300ms';
+		if (this.config.useTransitions) element.style.transition = 'transform ease 300ms';
 		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
 	};
 

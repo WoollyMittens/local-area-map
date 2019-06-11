@@ -25,11 +25,14 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var container = this.config.container;
 		var element = this.element;
 		var min = this.config.minimum;
+		var max = this.config.maximum;
 		// calculate the center
 		var centerX = (container.offsetWidth - element.naturalWidth * min.zoom) / 2;
 		var centerY = (container.offsetHeight - element.naturalHeight * min.zoom) / 2;
-		// store the initial zoom
-		this.config.position.zoom = this.config.minimum.zoom;
+		// store the initial position
+		this.config.position.lon = (min.lon + max.lon) / 2;
+		this.config.position.lat = (min.lat + max.lat) / 2;
+		this.config.position.zoom = min.zoom;
 		// position the canvas
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
 		// insert the image into the canvas

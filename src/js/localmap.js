@@ -22,6 +22,7 @@ var Localmap = function(config) {
     'routeData': null,
     'mapUrl': null,
     'creditsTemplate': null,
+    'useTransitions': null,
 		'minimum': {
 			'lon': null,
 			'lat': null,
@@ -46,15 +47,17 @@ var Localmap = function(config) {
 
   this.start = function() {
 		var _this = this;
+    /*
 		setTimeout(function() {
-      _this.focus(151.720030345, -32.9337152839, 1);
+      _this.focus(151.720030345, -32.9337152839, 1, true);
 		}, 2000);
     setTimeout(function() {
-      _this.focus(151.718354, -33.01304, 1.5);
+      _this.focus(151.718354, -33.01304, 1.5, true);
 		}, 4000);
     setTimeout(function() {
-      _this.focus(151.708188, -32.978277000000006, 2);
+      _this.focus(151.708188, -32.978277000000006, 2, true);
 		}, 6000);
+    */
 	};
 
   this.update = function() {
@@ -65,11 +68,13 @@ var Localmap = function(config) {
         this.components[key].update(this.config);
   };
 
-  this.focus = function(lon, lat, zoom) {
+  this.focus = function(lon, lat, zoom, smoothly) {
     console.log('focus on:', lon, lat, zoom);
-    this.config.position.lon = lon;
-    this.config.position.lat = lat;
-    this.config.position.zoom = zoom;
+    // try to keep the focus within bounds
+    this.config.useTransitions = smoothly;
+    this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon), this.config.minimum.lon);
+    this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat), this.config.minimum.lat);
+    this.config.position.zoom = Math.max(Math.min(zoom, this.config.maximum.zoom), this.config.minimum.zoom);
     this.update();
   };
 

@@ -22,6 +22,7 @@ var Localmap = function(config) {
     'routeData': null,
     'mapUrl': null,
     'creditsTemplate': null,
+    'useTransitions': null,
 		'minimum': {
 			'lon': null,
 			'lat': null,
@@ -46,15 +47,17 @@ var Localmap = function(config) {
 
   this.start = function() {
 		var _this = this;
+    /*
 		setTimeout(function() {
-      _this.focus(151.720030345, -32.9337152839, 1);
+      _this.focus(151.720030345, -32.9337152839, 1, true);
 		}, 2000);
     setTimeout(function() {
-      _this.focus(151.718354, -33.01304, 1.5);
+      _this.focus(151.718354, -33.01304, 1.5, true);
 		}, 4000);
     setTimeout(function() {
-      _this.focus(151.708188, -32.978277000000006, 2);
+      _this.focus(151.708188, -32.978277000000006, 2, true);
 		}, 6000);
+    */
 	};
 
   this.update = function() {
@@ -65,11 +68,13 @@ var Localmap = function(config) {
         this.components[key].update(this.config);
   };
 
-  this.focus = function(lon, lat, zoom) {
+  this.focus = function(lon, lat, zoom, smoothly) {
     console.log('focus on:', lon, lat, zoom);
-    this.config.position.lon = lon;
-    this.config.position.lat = lat;
-    this.config.position.zoom = zoom;
+    // try to keep the focus within bounds
+    this.config.useTransitions = smoothly;
+    this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon), this.config.minimum.lon);
+    this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat), this.config.minimum.lat);
+    this.config.position.zoom = Math.max(Math.min(zoom, this.config.maximum.zoom), this.config.minimum.zoom);
     this.update();
   };
 
@@ -130,11 +135,14 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var container = this.config.container;
 		var element = this.element;
 		var min = this.config.minimum;
+		var max = this.config.maximum;
 		// calculate the center
 		var centerX = (container.offsetWidth - element.naturalWidth * min.zoom) / 2;
 		var centerY = (container.offsetHeight - element.naturalHeight * min.zoom) / 2;
-		// store the initial zoom
-		this.config.position.zoom = this.config.minimum.zoom;
+		// store the initial position
+		this.config.position.lon = (min.lon + max.lon) / 2;
+		this.config.position.lat = (min.lat + max.lat) / 2;
+		this.config.position.zoom = min.zoom;
 		// position the canvas
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
 		// insert the image into the canvas
@@ -209,7 +217,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom * 0.99);
 		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom * 0.99);
 		// position the background
-		element.style.transition = 'transform ease 300ms';
+		if (this.config.useTransitions) element.style.transition = 'transform ease 300ms';
 		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
 	};
 
@@ -240,7 +248,8 @@ Localmap.prototype.Controls = function (parent) {
 
 	this.parent = parent;
 	this.config = parent.config;
-	this.element = null;
+	this.touches = null;
+	this.inertia = {x:0, y:0, z:0};
 
 	// METHODS
 
@@ -251,13 +260,78 @@ Localmap.prototype.Controls = function (parent) {
 	};
 
 	// TODO: buttons to incrementally zoom in, zoom out, move north, move south, move east, move west.
-	// TODO: touch controls for pinch-to-zoom and swipe-to-move.
+	
+	// TODO: mouse wheel to zoom
 
 	this.update = function() {
 		console.log('controls.update');
 	};
 
+	this.coasting = function() {
+		console.log('coasting', this.inertia, this.config.position.lon);
+		// move the map according to the inertia
+		this.parent.focus(
+			this.config.position.lon + (this.config.maximum.lon - this.config.minimum.lon) * -this.inertia.x,
+			this.config.position.lat + (this.config.maximum.lat - this.config.minimum.lat) * -this.inertia.y,
+			this.config.position.zoom + (this.config.maximum.zoom - this.config.minimum.zoom) * -this.inertia.z
+		);
+		// if the inertia is above a certain level
+		if (Math.abs(this.inertia.x) > 0.0001 || Math.abs(this.inertia.y) > 0.0001 || Math.abs(this.inertia.z) > 0.0001) {
+			// attenuate the inertia
+			this.inertia.x *= 0.9;
+			this.inertia.y *= 0.9;
+			this.inertia.z *= 0.7;
+			// continue monitoring
+			window.cancelAnimationFrame(this.animationFrame);
+			this.animationFrame = window.requestAnimationFrame(this.coasting.bind(this));
+		}
+	};
+
+	this.startInteraction = function(evt) {
+		evt.preventDefault();
+		// reset inertial movement
+		this.inertia.x = 0;
+		this.inertia.y = 0;
+		this.inertia.z = 0;
+		// store the initial touch(es)
+		this.touches = evt.touches;
+	};
+
+	this.moveInteraction = function(evt) {
+		evt.preventDefault();
+		var width = this.config.canvasElement.offsetWidth * this.config.position.zoom;
+		var height = this.config.canvasElement.offsetHeight * this.config.position.zoom;
+		var prev = this.touches;
+		var next = evt.touches;
+		var nextX = (next.length > 1) ? (next[0].clientX + next[1].clientX) / 2 : next[0].clientX;
+		var nextY = (next.length > 1) ? (next[0].clientY + next[1].clientY) / 2 : next[0].clientY;
+		var prevX = (prev.length > 1) ? (prev[0].clientX + prev[1].clientX) / 2 : prev[0].clientX;
+		var prevY = (prev.length > 1) ? (prev[0].clientY + prev[1].clientY) / 2 : prev[0].clientY;
+		// update the inertia
+		this.inertia.x = (nextX - prevX) / width;
+		this.inertia.y = (nextY - prevY) / height;
+		this.inertia.z = (next.length > 1 && prev.length > 1) ? ((next[0].clientX - next[1].clientX) - (prev[0].clientX - prev[1].clientX)) / width + ((next[0].clientY - next[1].clientY) - (prev[0].clientY - prev[1].clientY)) / height : 0;
+		// start coasting on inertia
+		this.coasting();
+		// store the touches
+		this.touches = evt.touches;
+	};
+
+	this.endInteraction = function(evt) {
+		// clear the interaction
+		this.touches = null;
+		// coast on inertia
+	};
+
+	this.cancelInteraction = function(evt) {
+	};
+
 	// EVENTS
+
+	this.config.container.addEventListener('touchstart', this.startInteraction.bind(this));
+	this.config.container.addEventListener('touchmove', this.moveInteraction.bind(this));
+	this.config.container.addEventListener('touchend', this.endInteraction.bind(this));
+	this.config.container.addEventListener('touchcancel', this.cancelInteraction.bind(this));
 
 	this.start();
 
@@ -393,11 +467,10 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		config.position.lon = (config.maximum.lon - config.minimum.lon) / 2;
 		config.position.lat = (config.maximum.lat - config.minimum.lat) / 2;
 		// position every marker in the guide
-		Object.keys(guideData.markers).map(this.addMarker.bind(this));
+		guideData.markers.map(this.addMarker.bind(this));
 	};
 
-	this.addMarker = function(key) {
-		var markerData = this.config.guideData.markers[key];
+	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
 		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
@@ -562,7 +635,7 @@ Localmap.prototype.Route = function (parent) {
 		ctx.strokeStyle = 'orange';
 		ctx.beginPath();
 		for (var key in trackpoints) {
-			if (!isNaN(key) && key % 1 == 0) {
+			if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
 				if (x = null) ctx.moveTo(x, y);
 				x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
 				y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);

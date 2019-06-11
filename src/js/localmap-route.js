@@ -43,7 +43,7 @@ Localmap.prototype.Route = function (parent) {
 		ctx.strokeStyle = 'orange';
 		ctx.beginPath();
 		for (var key in trackpoints) {
-			if (!isNaN(key) && key % 1 == 0) {
+			if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
 				if (x = null) ctx.moveTo(x, y);
 				x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
 				y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);

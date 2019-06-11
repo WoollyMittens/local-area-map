@@ -40,11 +40,10 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		config.position.lon = (config.maximum.lon - config.minimum.lon) / 2;
 		config.position.lat = (config.maximum.lat - config.minimum.lat) / 2;
 		// position every marker in the guide
-		Object.keys(guideData.markers).map(this.addMarker.bind(this));
+		guideData.markers.map(this.addMarker.bind(this));
 	};
 
-	this.addMarker = function(key) {
-		var markerData = this.config.guideData.markers[key];
+	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
 		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
