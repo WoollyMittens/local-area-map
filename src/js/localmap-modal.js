@@ -25,7 +25,8 @@ Localmap.prototype.Modal = function (parent) {
 		this.closer = document.createElement('button');
 		this.closer.setAttribute('class', 'localmap-modal-closer');
 		this.closer.innerHTML = 'Close';
-		this.closer.addEventListener('click', this.onDismiss.bind(this));
+		this.closer.addEventListener('touchend', this.onDismiss.bind(this));
+		this.closer.addEventListener('mouseup', this.onDismiss.bind(this));
 		this.element.appendChild(this.closer);
 		// insert the modal
 		this.config.container.appendChild(this.element);

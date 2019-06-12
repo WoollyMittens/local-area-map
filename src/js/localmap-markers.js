@@ -45,7 +45,8 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
-		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
+		markerData.element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
+		markerData.element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
 		this.parent.element.appendChild(markerData.element);
 		this.elements.push(markerData.element);
 	}

@@ -27,12 +27,12 @@
 	&-location,
 	&-marker {
 		position: absolute;
-		width: 24px;
-		height: 24px;
-		margin-left: -12px;
-		margin-top: -12px;
+		width: 28px;
+		height: 28px;
+		margin-left: -14px;
+		margin-top: -14px;
 		transform: scale(1);
-		transform-origin: 50% 0;
+		transform-origin: 50% 100%;
 		z-index: 3;
 	}
 
@@ -161,14 +161,14 @@
 			height: 3rem;
 			border: none;
 			background: #0d47a1;
-			background-image: url('../img/close.svg');
+			background-image: url('../img/icon-close.svg');
 			background-repeat: no-repeat;
 			background-position: center;
 			background-size: 50% auto;
 			color: #fff;
 			cursor: pointer;
 			overflow: hidden;
-			text-indent: 125%;
+			text-indent: 2000%;
 		}
 	}
 }
