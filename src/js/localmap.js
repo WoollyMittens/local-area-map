@@ -21,6 +21,8 @@ var Localmap = function(config) {
     'routeUrl': null,
     'routeData': null,
     'mapUrl': null,
+    'exifData': null,
+    'exifUrl': null,
     'creditsTemplate': null,
     'useTransitions': null,
 		'minimum': {
@@ -37,7 +39,15 @@ var Localmap = function(config) {
 			'lon': null,
 			'lat': null,
 			'zoom': null
-		}
+		},
+    'indicator': {
+      'icon': null,
+      'photo': null,
+      'description': null,
+      'lon': null,
+			'lat': null,
+			'zoom': null
+    }
   };
 
   for (var key in config)
@@ -82,7 +92,32 @@ var Localmap = function(config) {
     this.update();
   };
 
+  this.indicate = function(source, description, lon, lat) {
+    // TODO: get the coordinates from the cached exif data or failing that the webservice
+    var cached = this.config.exifData[source];
+    lon = lon || cached.lon;
+    lat = lat || cached.lat;
+    // make a promise for when the exif data is fetched
+    var _this = this;
+    var resolution = function(lon, lat) {
+      // highlight a location with an optional description on the map
+      _this.focus(lon, lat, _this.config.maximum.zoom, true);
+      // store the marker data somewhere for the sub-component to get it
+      _this.config.indicator = {
+        'photo': source,
+        'description': description,
+        'lon': cached.lon,
+        'lat': cached.lat
+      };
+      // redraw
+      _this.update();
+    };
+    // TODO: for now resolve the promise immediately instead of after the EXIF AJAX call
+    resolution(lon, lat);
+  };
+
   this.describe = function(markerdata) {
+    console.log('describe', markerdata);
     // show a popup describing the markerdata
     this.components.modal.show(markerdata);
   };

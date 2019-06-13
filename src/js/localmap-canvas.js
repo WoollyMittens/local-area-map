@@ -54,6 +54,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
   this.components = {
 		background: new parent.Background(this, onBackgroundComplete),
 		markers: new parent.Markers(this, onMarkerClicked),
+		indicator: new parent.Indicator(this, onMarkerClicked),
 		route: new parent.Route(this),
 		location: new parent.Location(this)
   };

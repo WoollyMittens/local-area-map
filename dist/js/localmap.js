@@ -21,6 +21,8 @@ var Localmap = function(config) {
     'routeUrl': null,
     'routeData': null,
     'mapUrl': null,
+    'exifData': null,
+    'exifUrl': null,
     'creditsTemplate': null,
     'useTransitions': null,
 		'minimum': {
@@ -37,7 +39,15 @@ var Localmap = function(config) {
 			'lon': null,
 			'lat': null,
 			'zoom': null
-		}
+		},
+    'indicator': {
+      'icon': null,
+      'photo': null,
+      'description': null,
+      'lon': null,
+			'lat': null,
+			'zoom': null
+    }
   };
 
   for (var key in config)
@@ -82,7 +92,32 @@ var Localmap = function(config) {
     this.update();
   };
 
+  this.indicate = function(source, description, lon, lat) {
+    // TODO: get the coordinates from the cached exif data or failing that the webservice
+    var cached = this.config.exifData[source];
+    lon = lon || cached.lon;
+    lat = lat || cached.lat;
+    // make a promise for when the exif data is fetched
+    var _this = this;
+    var resolution = function(lon, lat) {
+      // highlight a location with an optional description on the map
+      _this.focus(lon, lat, _this.config.maximum.zoom, true);
+      // store the marker data somewhere for the sub-component to get it
+      _this.config.indicator = {
+        'photo': source,
+        'description': description,
+        'lon': cached.lon,
+        'lat': cached.lat
+      };
+      // redraw
+      _this.update();
+    };
+    // TODO: for now resolve the promise immediately instead of after the EXIF AJAX call
+    resolution(lon, lat);
+  };
+
   this.describe = function(markerdata) {
+    console.log('describe', markerdata);
     // show a popup describing the markerdata
     this.components.modal.show(markerdata);
   };
@@ -226,6 +261,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
   this.components = {
 		background: new parent.Background(this, onBackgroundComplete),
 		markers: new parent.Markers(this, onMarkerClicked),
+		indicator: new parent.Indicator(this, onMarkerClicked),
 		route: new parent.Route(this),
 		location: new parent.Location(this)
   };
@@ -376,6 +412,83 @@ Localmap.prototype.Credits = function (parent) {
 };
 
 // extend the class
+Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
+
+	// PROPERTIES
+
+	this.parent = parent;
+	this.config = parent.config;
+	this.element = new Image();
+	this.onMarkerClicked = onMarkerClicked;
+	this.zoom = null;
+	this.lon = null;
+	this.lat = null;
+
+	// METHODS
+
+	this.start = function() {
+		// create the indicator
+		this.element.setAttribute('src', this.config.markersUrl.replace('{type}', 'indicator'));
+		this.element.setAttribute('alt', '');
+		this.element.setAttribute('class', 'localmap-indicator');
+		// get marker data from API call
+		this.element.addEventListener('mouseup', this.onIndicatorClicked.bind(this));
+		this.element.addEventListener('touchend', this.onIndicatorClicked.bind(this));
+		this.parent.element.appendChild(this.element);
+	};
+
+	this.update = function() {
+		// only resize if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) this.resize();
+		// only reposition if the content has changed
+		if (this.lon !== this.config.indicator.lon  && this.lat !== this.config.indicator.lat) this.reposition();
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
+	};
+
+	this.resize = function() {
+		// resize the marker according to scale
+		var scale = 1 / this.config.position.zoom;
+		this.element.style.transform = 'scale(' + scale + ')';
+	};
+
+	this.reposition = function() {
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		var lon = this.config.indicator.lon;
+		var lat = this.config.indicator.lat;
+		// if the location is within bounds
+		if (lon > min.lon && lon < max.lon && lat < min.lat && lat > max.lat) {
+			// store the new position
+			this.lon = lon;
+			this.lat = lat;
+			// display the marker
+			this.element.style.cursor = (this.config.indicator.description) ? 'pointer' : 'default';
+			this.element.style.display = 'block';
+			this.element.style.left = ((lon - min.lon) / (max.lon - min.lon) * 100) + '%';
+			this.element.style.top = ((lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		// otherwise
+		} else {
+			// hide the marker
+			this.lon = null;
+			this.lat = null;
+			this.element.style.display = 'none';
+		}
+	};
+
+	// EVENTS
+
+	this.onIndicatorClicked = function(evt) {
+		evt.preventDefault();
+		// report that the indicator was clicked
+		this.onMarkerClicked(this.config.indicator);
+	};
+
+	this.start();
+
+};
+
+// extend the class
 Localmap.prototype.Location = function (parent) {
 
 	// PROPERTIES
@@ -383,6 +496,7 @@ Localmap.prototype.Location = function (parent) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = new Image();
+	this.zoom = null;
 
 	// METHODS
 
@@ -399,6 +513,13 @@ Localmap.prototype.Location = function (parent) {
 	};
 
 	this.update = function() {
+		// only resize if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) this.resize();
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
+	};
+
+	this.resize = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
 		this.element.style.transform = 'scale(' + scale + ')';
@@ -450,16 +571,18 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.update = function() {
-		// only redraw if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) {
-			// resize the markers according to scale
-			var scale = 1 / this.config.position.zoom;
-			for (var key in this.elements) {
-				this.elements[key].style.transform = 'scale(' + scale + ')'
-			}
-		}
+		// only resize if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) this.resize();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.resize = function() {
+		// resize the markers according to scale
+		var scale = 1 / this.config.position.zoom;
+		for (var key in this.elements) {
+			this.elements[key].style.transform = 'scale(' + scale + ')'
+		}
 	};
 
 	this.addGuide = function() {
@@ -618,32 +741,34 @@ Localmap.prototype.Route = function (parent) {
 
 	this.update = function() {
 		// only redraw if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) {
-			// adjust the height of the canvas
-			this.canvas.width = this.parent.element.offsetWidth;
-			this.canvas.height = this.parent.element.offsetHeight;
-			// position every trackpoint in the route
-			var routeData = this.config.routeData;
-			var trackpoints = routeData.getElementsByTagName('trkpt');
-			var ctx = this.canvas.getContext('2d');
-			// (re)draw the route
-			var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
-			ctx.clearRect(0, 0, w, h);
-			ctx.lineWidth = 4 / z;
-			ctx.strokeStyle = 'orange';
-			ctx.beginPath();
-			for (var key in trackpoints) {
-				if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
-					if (x = null) ctx.moveTo(x, y);
-					x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
-					y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
-					ctx.lineTo(x, y);
-				}
-			}
-			ctx.stroke();
-		}
+		if (this.zoom !== this.config.position.zoom) this.redraw();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.redraw = function() {
+		// adjust the height of the canvas
+		this.canvas.width = this.parent.element.offsetWidth;
+		this.canvas.height = this.parent.element.offsetHeight;
+		// position every trackpoint in the route
+		var routeData = this.config.routeData;
+		var trackpoints = routeData.getElementsByTagName('trkpt');
+		var ctx = this.canvas.getContext('2d');
+		// (re)draw the route
+		var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
+		ctx.clearRect(0, 0, w, h);
+		ctx.lineWidth = 4 / z;
+		ctx.strokeStyle = 'orange';
+		ctx.beginPath();
+		for (var key in trackpoints) {
+			if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
+				if (x = null) ctx.moveTo(x, y);
+				x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
+				y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+				ctx.lineTo(x, y);
+			}
+		}
+		ctx.stroke();
 	};
 
 	// EVENTS
@@ -677,32 +802,34 @@ Localmap.prototype.Scale = function (parent) {
 
 	this.update = function() {
 		// only redraw if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) {
-			// how big is the map in kilometres along the bottom
-			var mapSize = this.distance(
-				{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
-				{'lon': this.config.maximum.lon, 'lat': this.config.maximum.lat}
-			);
-			// what portion of that is in the container
-			var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
-			// use a fraction of that as the scale
-			var scaleSize = visible * mapSize / 6;
-			// round to the nearest increment
-			var scale = 50, label = '50km';
-			if (scaleSize < 10) { scale = 10; label = '10km' }
-			if (scaleSize < 5) { scale = 5; label = '5km' }
-			if (scaleSize < 2) { scale = 2; label = '2km' }
-			if (scaleSize < 1) { scale = 1; label = '1km' }
-			if (scaleSize < 0.5) { scale = 0.5; label = '500m' }
-			if (scaleSize < 0.2) { scale = 0.2; label = '200m' }
-			if (scaleSize < 0.1) { scale = 0.1; label = '100m' }
-			// size the scale to the increment
-			this.element.style.width = (scale / visible / mapSize * 100) + '%';
-			// fill the scale with the increment
-			this.element.innerHTML = label;
-		}
+		if (this.zoom !== this.config.position.zoom) this.redraw();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.redraw = function() {
+		// how big is the map in kilometres along the bottom
+		var mapSize = this.distance(
+			{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
+			{'lon': this.config.maximum.lon, 'lat': this.config.maximum.lat}
+		);
+		// what portion of that is in the container
+		var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
+		// use a fraction of that as the scale
+		var scaleSize = visible * mapSize / 6;
+		// round to the nearest increment
+		var scale = 50, label = '50km';
+		if (scaleSize < 10) { scale = 10; label = '10km' }
+		if (scaleSize < 5) { scale = 5; label = '5km' }
+		if (scaleSize < 2) { scale = 2; label = '2km' }
+		if (scaleSize < 1) { scale = 1; label = '1km' }
+		if (scaleSize < 0.5) { scale = 0.5; label = '500m' }
+		if (scaleSize < 0.2) { scale = 0.2; label = '200m' }
+		if (scaleSize < 0.1) { scale = 0.1; label = '100m' }
+		// size the scale to the increment
+		this.element.style.width = (scale / visible / mapSize * 100) + '%';
+		// fill the scale with the increment
+		this.element.innerHTML = label;
 	};
 
 	this.distance = function(A, B) {

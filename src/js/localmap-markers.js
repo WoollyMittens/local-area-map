@@ -20,16 +20,18 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.update = function() {
-		// only redraw if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) {
-			// resize the markers according to scale
-			var scale = 1 / this.config.position.zoom;
-			for (var key in this.elements) {
-				this.elements[key].style.transform = 'scale(' + scale + ')'
-			}
-		}
+		// only resize if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) this.resize();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.resize = function() {
+		// resize the markers according to scale
+		var scale = 1 / this.config.position.zoom;
+		for (var key in this.elements) {
+			this.elements[key].style.transform = 'scale(' + scale + ')'
+		}
 	};
 
 	this.addGuide = function() {

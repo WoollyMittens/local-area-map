@@ -6,6 +6,7 @@ Localmap.prototype.Location = function (parent) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = new Image();
+	this.zoom = null;
 
 	// METHODS
 
@@ -22,6 +23,13 @@ Localmap.prototype.Location = function (parent) {
 	};
 
 	this.update = function() {
+		// only resize if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) this.resize();
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
+	};
+
+	this.resize = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
 		this.element.style.transform = 'scale(' + scale + ')';

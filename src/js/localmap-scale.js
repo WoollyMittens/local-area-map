@@ -18,32 +18,34 @@ Localmap.prototype.Scale = function (parent) {
 
 	this.update = function() {
 		// only redraw if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) {
-			// how big is the map in kilometres along the bottom
-			var mapSize = this.distance(
-				{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
-				{'lon': this.config.maximum.lon, 'lat': this.config.maximum.lat}
-			);
-			// what portion of that is in the container
-			var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
-			// use a fraction of that as the scale
-			var scaleSize = visible * mapSize / 6;
-			// round to the nearest increment
-			var scale = 50, label = '50km';
-			if (scaleSize < 10) { scale = 10; label = '10km' }
-			if (scaleSize < 5) { scale = 5; label = '5km' }
-			if (scaleSize < 2) { scale = 2; label = '2km' }
-			if (scaleSize < 1) { scale = 1; label = '1km' }
-			if (scaleSize < 0.5) { scale = 0.5; label = '500m' }
-			if (scaleSize < 0.2) { scale = 0.2; label = '200m' }
-			if (scaleSize < 0.1) { scale = 0.1; label = '100m' }
-			// size the scale to the increment
-			this.element.style.width = (scale / visible / mapSize * 100) + '%';
-			// fill the scale with the increment
-			this.element.innerHTML = label;
-		}
+		if (this.zoom !== this.config.position.zoom) this.redraw();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.redraw = function() {
+		// how big is the map in kilometres along the bottom
+		var mapSize = this.distance(
+			{'lon': this.config.minimum.lon, 'lat': this.config.maximum.lat},
+			{'lon': this.config.maximum.lon, 'lat': this.config.maximum.lat}
+		);
+		// what portion of that is in the container
+		var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
+		// use a fraction of that as the scale
+		var scaleSize = visible * mapSize / 6;
+		// round to the nearest increment
+		var scale = 50, label = '50km';
+		if (scaleSize < 10) { scale = 10; label = '10km' }
+		if (scaleSize < 5) { scale = 5; label = '5km' }
+		if (scaleSize < 2) { scale = 2; label = '2km' }
+		if (scaleSize < 1) { scale = 1; label = '1km' }
+		if (scaleSize < 0.5) { scale = 0.5; label = '500m' }
+		if (scaleSize < 0.2) { scale = 0.2; label = '200m' }
+		if (scaleSize < 0.1) { scale = 0.1; label = '100m' }
+		// size the scale to the increment
+		this.element.style.width = (scale / visible / mapSize * 100) + '%';
+		// fill the scale with the increment
+		this.element.innerHTML = label;
 	};
 
 	this.distance = function(A, B) {
