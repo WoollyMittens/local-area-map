@@ -55,21 +55,6 @@ var Localmap = function(config) {
 
   // METHODS
 
-  this.start = function() {
-		var _this = this;
-    /*
-		setTimeout(function() {
-      _this.focus(151.720030345, -32.9337152839, 1, true);
-		}, 2000);
-    setTimeout(function() {
-      _this.focus(151.718354, -33.01304, 1.5, true);
-		}, 4000);
-    setTimeout(function() {
-      _this.focus(151.708188, -32.978277000000006, 2, true);
-		}, 6000);
-    */
-	};
-
   this.update = function() {
     // retard the update
 		window.cancelAnimationFrame(this.animationFrame);
@@ -92,32 +77,7 @@ var Localmap = function(config) {
     this.update();
   };
 
-  this.indicate = function(source, description, lon, lat) {
-    // TODO: get the coordinates from the cached exif data or failing that the webservice
-    var cached = this.config.exifData[source];
-    lon = lon || cached.lon;
-    lat = lat || cached.lat;
-    // make a promise for when the exif data is fetched
-    var _this = this;
-    var resolution = function(lon, lat) {
-      // highlight a location with an optional description on the map
-      _this.focus(lon, lat, _this.config.maximum.zoom, true);
-      // store the marker data somewhere for the sub-component to get it
-      _this.config.indicator = {
-        'photo': source,
-        'description': description,
-        'lon': cached.lon,
-        'lat': cached.lat
-      };
-      // redraw
-      _this.update();
-    };
-    // TODO: for now resolve the promise immediately instead of after the EXIF AJAX call
-    resolution(lon, lat);
-  };
-
   this.describe = function(markerdata) {
-    console.log('describe', markerdata);
     // show a popup describing the markerdata
     this.components.modal.show(markerdata);
   };
@@ -125,6 +85,60 @@ var Localmap = function(config) {
   this.end = function() {
     // release the container
     this.container.innerHTML = '';
+  };
+
+  this.indicate = function(source, description, lon, lat) {
+    // get the coordinates from the cached exif data or failing that the webservice
+    var cached = this.config.exifData[source.split('/').pop()];
+    // store the marker data somewhere for the sub-component to get it
+    this.config.indicator = {
+      'photo': source.split('/').pop(),
+      'description': description,
+      'lon': lon || cached.lon,
+      'lat': lat || cached.lat
+    };
+    // if the coordinates are known
+    if (this.config.indicator.lon && this.config.indicator.lat) {
+      // display the indicator immediately
+      this.onIndicateSuccess();
+    } else {
+      // try to retrieve them from the photo
+      var guideXhr = new XMLHttpRequest();
+      guideXhr.addEventListener('load', this.onExifLoaded.bind(this));
+      guideXhr.open('GET', this.config.exifUrl.replace('{src}', source), true);
+      guideXhr.send();
+    }
+  };
+
+  // EVENTS
+
+  this.onExifLoaded = function(result) {
+    var exif = JSON.parse(result.target.response);
+    var deg, min, sec, ref, coords = {};
+    // if the exif data contains GPS information
+    if (exif && exif.GPS) {
+      // convert the lon into a usable format
+      deg = parseInt(exif.GPS.GPSLongitude[0]);
+      min = parseInt(exif.GPS.GPSLongitude[1]);
+      sec = parseInt(exif.GPS.GPSLongitude[2]) / 100;
+      ref = exif.GPS.GPSLongitudeRef;
+      this.config.indicator.lon = (deg + min / 60 + sec / 3600) * (ref === "W" ? -1 : 1);
+      // convert the lat into a usable format
+      deg = parseInt(exif.GPS.GPSLatitude[0]);
+      min = parseInt(exif.GPS.GPSLatitude[1]);
+      sec = parseInt(exif.GPS.GPSLatitude[2]) / 100;
+      ref = exif.GPS.GPSLatitudeRef;
+      this.config.indicator.lat = (deg + min / 60 + sec / 3600) * (ref === "N" ? 1 : -1);
+      // return the result
+      this.onIndicateSuccess();
+    }
+  };
+
+  this.onIndicateSuccess = function() {
+    // highlight a location with an optional description on the map
+    this.focus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
+    // redraw
+    this.update();
   };
 
   // CLASSES
@@ -136,10 +150,6 @@ var Localmap = function(config) {
     credits: new this.Credits(this),
     modal: new this.Modal(this)
   };
-
-  // EVENTS
-
-	this.start();
 
 };
 
