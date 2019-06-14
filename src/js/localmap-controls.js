@@ -7,13 +7,29 @@ Localmap.prototype.Controls = function (parent) {
 	this.config = parent.config;
 	this.touches = null;
 	this.inertia = {x:0, y:0, z:0};
+	this.elements = {};
 
 	// METHODS
 
 	this.start = function() {
+		// add controls to the page
 		this.element = document.createElement('nav');
 		this.element.setAttribute('class', 'localmap-controls');
 		this.config.container.appendChild(this.element);
+		// add the zoom in button
+		this.elements.zoomin = document.createElement('button');
+		this.elements.zoomin.innerHTML = 'Zoom in';
+		this.elements.zoomin.setAttribute('class', 'localmap-controls-zoomin');
+		this.elements.zoomin.addEventListener('touchend', this.onZoomIn.bind(this));
+		this.elements.zoomin.addEventListener('mouseup', this.onZoomIn.bind(this));
+		this.element.appendChild(this.elements.zoomin);
+		// add the zoom out button
+		this.elements.zoomout = document.createElement('button');
+		this.elements.zoomout.innerHTML = 'Zoom out';
+		this.elements.zoomout.setAttribute('class', 'localmap-controls-zoomout');
+		this.elements.zoomout.addEventListener('touchend', this.onZoomOut.bind(this));
+		this.elements.zoomout.addEventListener('mouseup', this.onZoomOut.bind(this));
+		this.element.appendChild(this.elements.zoomout);
 	};
 
 	// TODO: buttons to incrementally zoom in, zoom out, move north, move south, move east, move west.
@@ -91,11 +107,28 @@ Localmap.prototype.Controls = function (parent) {
 
 	// EVENTS
 
+	this.onZoomIn = function(evt) {
+		this.parent.focus(
+			this.config.position.lon,
+			this.config.position.lat,
+			this.config.position.zoom * 3/2,
+			true
+		);
+	};
+
+	this.onZoomOut = function(evt) {
+		this.parent.focus(
+			this.config.position.lon,
+			this.config.position.lat,
+			this.config.position.zoom * 2/3,
+			true
+		);
+	};
+
 	this.config.container.addEventListener('mousedown', this.startInteraction.bind(this));
 	this.config.container.addEventListener('mousemove', this.moveInteraction.bind(this));
 	this.config.container.addEventListener('mouseup', this.endInteraction.bind(this));
 	this.config.container.addEventListener('wheel', this.wheelInteraction.bind(this));
-
 
 	this.config.container.addEventListener('touchstart', this.startInteraction.bind(this));
 	this.config.container.addEventListener('touchmove', this.moveInteraction.bind(this));

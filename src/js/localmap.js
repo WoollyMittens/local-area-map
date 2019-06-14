@@ -89,10 +89,11 @@ var Localmap = function(config) {
 
   this.indicate = function(source, description, lon, lat) {
     // get the coordinates from the cached exif data or failing that the webservice
-    var cached = this.config.exifData[source.split('/').pop()];
+    var filename = source.split('/').pop();
+    var cached = this.config.exifData[filename];
     // store the marker data somewhere for the sub-component to get it
     this.config.indicator = {
-      'photo': source.split('/').pop(),
+      'photo': filename,
       'description': description,
       'lon': lon || cached.lon,
       'lat': lat || cached.lat
