@@ -653,9 +653,12 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = document.createElement('span');
 		element.setAttribute('class', 'localmap-waypoint');
+		element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
+		element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';
+
 		return element;
 	};
 
@@ -708,7 +711,7 @@ Localmap.prototype.Modal = function (parent) {
 		// create the modal
 		this.element = document.createElement('section');
 		this.element.setAttribute('class', 'localmap-modal localmap-modal-hidden');
-		// add the content area
+		// add the photo
 		this.photo = document.createElement('figure');
 		this.photo.setAttribute('class', 'localmap-modal-photo');
 		this.element.appendChild(this.photo);
@@ -730,6 +733,9 @@ Localmap.prototype.Modal = function (parent) {
 	this.update = function() {};
 
 	this.show = function(markerData) {
+
+// TODO: if there is no photo use the icon but as an aside
+
 		// display the photo if available
 		if (markerData.photo) {
 			this.photo.style.display = null;
@@ -739,7 +745,8 @@ Localmap.prototype.Modal = function (parent) {
 		}
 		// display the content if available
 		if (markerData.description) {
-			this.description.innerHTML = '<p>' + markerData.description + '</p>';
+			this.description.innerHTML = (markerData.photo) ? '' : '<img class="localmap-modal-icon" src="' + this.config.markersUrl.replace('{type}', markerData.type) + '" alt=""/>';
+			this.description.innerHTML += '<p>' + markerData.description + '</p>';
 		} else {
 			return false;
 		}

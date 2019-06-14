@@ -58,9 +58,12 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = document.createElement('span');
 		element.setAttribute('class', 'localmap-waypoint');
+		element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
+		element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';
+
 		return element;
 	};
 
