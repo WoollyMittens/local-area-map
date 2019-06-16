@@ -19,8 +19,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 		this.element.setAttribute('alt', '');
 		this.element.setAttribute('class', 'localmap-indicator');
 		// get marker data from API call
-		this.element.addEventListener('mouseup', this.onIndicatorClicked.bind(this));
-		this.element.addEventListener('touchend', this.onIndicatorClicked.bind(this));
+		this.element.addEventListener('click', this.onIndicatorClicked.bind(this));
 		this.parent.element.appendChild(this.element);
 	};
 

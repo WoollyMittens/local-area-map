@@ -47,8 +47,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
-		markerData.element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
-		markerData.element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
+		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
 		this.parent.element.appendChild(markerData.element);
 		this.elements.push(markerData.element);
 	}
@@ -58,8 +57,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = document.createElement('span');
 		element.setAttribute('class', 'localmap-waypoint');
-		element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
-		element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
+		element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';

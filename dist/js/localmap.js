@@ -310,15 +310,13 @@ Localmap.prototype.Controls = function (parent) {
 		this.elements.zoomin = document.createElement('button');
 		this.elements.zoomin.innerHTML = 'Zoom in';
 		this.elements.zoomin.setAttribute('class', 'localmap-controls-zoomin');
-		this.elements.zoomin.addEventListener('touchend', this.onZoomIn.bind(this));
-		this.elements.zoomin.addEventListener('mouseup', this.onZoomIn.bind(this));
+		this.elements.zoomin.addEventListener('click', this.onZoomIn.bind(this));
 		this.element.appendChild(this.elements.zoomin);
 		// add the zoom out button
 		this.elements.zoomout = document.createElement('button');
 		this.elements.zoomout.innerHTML = 'Zoom out';
 		this.elements.zoomout.setAttribute('class', 'localmap-controls-zoomout');
-		this.elements.zoomout.addEventListener('touchend', this.onZoomOut.bind(this));
-		this.elements.zoomout.addEventListener('mouseup', this.onZoomOut.bind(this));
+		this.elements.zoomout.addEventListener('click', this.onZoomOut.bind(this));
 		this.element.appendChild(this.elements.zoomout);
 	};
 
@@ -346,7 +344,6 @@ Localmap.prototype.Controls = function (parent) {
 	};
 
 	this.startInteraction = function(evt) {
-		evt.preventDefault();
 		// reset inertial movement
 		this.inertia.x = 0;
 		this.inertia.y = 0;
@@ -476,8 +473,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 		this.element.setAttribute('alt', '');
 		this.element.setAttribute('class', 'localmap-indicator');
 		// get marker data from API call
-		this.element.addEventListener('mouseup', this.onIndicatorClicked.bind(this));
-		this.element.addEventListener('touchend', this.onIndicatorClicked.bind(this));
+		this.element.addEventListener('click', this.onIndicatorClicked.bind(this));
 		this.parent.element.appendChild(this.element);
 	};
 
@@ -642,8 +638,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
-		markerData.element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
-		markerData.element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
+		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
 		this.parent.element.appendChild(markerData.element);
 		this.elements.push(markerData.element);
 	}
@@ -653,8 +648,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = document.createElement('span');
 		element.setAttribute('class', 'localmap-waypoint');
-		element.addEventListener('mouseup', this.onMarkerClicked.bind(this, markerData));
-		element.addEventListener('touchend', this.onMarkerClicked.bind(this, markerData));
+		element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';
@@ -723,8 +717,7 @@ Localmap.prototype.Modal = function (parent) {
 		this.closer = document.createElement('button');
 		this.closer.setAttribute('class', 'localmap-modal-closer');
 		this.closer.innerHTML = 'Close';
-		this.closer.addEventListener('touchend', this.onDismiss.bind(this));
-		this.closer.addEventListener('mouseup', this.onDismiss.bind(this));
+		this.closer.addEventListener('click', this.onDismiss.bind(this));
 		this.element.appendChild(this.closer);
 		// insert the modal
 		this.config.container.appendChild(this.element);

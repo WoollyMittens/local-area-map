@@ -20,15 +20,13 @@ Localmap.prototype.Controls = function (parent) {
 		this.elements.zoomin = document.createElement('button');
 		this.elements.zoomin.innerHTML = 'Zoom in';
 		this.elements.zoomin.setAttribute('class', 'localmap-controls-zoomin');
-		this.elements.zoomin.addEventListener('touchend', this.onZoomIn.bind(this));
-		this.elements.zoomin.addEventListener('mouseup', this.onZoomIn.bind(this));
+		this.elements.zoomin.addEventListener('click', this.onZoomIn.bind(this));
 		this.element.appendChild(this.elements.zoomin);
 		// add the zoom out button
 		this.elements.zoomout = document.createElement('button');
 		this.elements.zoomout.innerHTML = 'Zoom out';
 		this.elements.zoomout.setAttribute('class', 'localmap-controls-zoomout');
-		this.elements.zoomout.addEventListener('touchend', this.onZoomOut.bind(this));
-		this.elements.zoomout.addEventListener('mouseup', this.onZoomOut.bind(this));
+		this.elements.zoomout.addEventListener('click', this.onZoomOut.bind(this));
 		this.element.appendChild(this.elements.zoomout);
 	};
 
@@ -56,7 +54,6 @@ Localmap.prototype.Controls = function (parent) {
 	};
 
 	this.startInteraction = function(evt) {
-		evt.preventDefault();
 		// reset inertial movement
 		this.inertia.x = 0;
 		this.inertia.y = 0;
