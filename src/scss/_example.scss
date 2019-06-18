@@ -1,11 +1,13 @@
 .sample-photos {
 	list-style-type: none;
 	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
 
 	li {
 		display: inline-block;
 		vertical-align: middle;
-		margin: 0 10px 10px 0;
+		padding: 0 10px 10px 0;
 
 		a {
 			display: block;
@@ -17,6 +19,7 @@
 			text-indent: 200%;
 			background-position: center;
 			background-size: cover;
+			border: solid 1px #000;
 		}
 	}
 }

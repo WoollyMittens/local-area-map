@@ -61,7 +61,6 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';
-
 		return element;
 	};
 

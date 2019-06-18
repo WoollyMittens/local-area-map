@@ -7,11 +7,7 @@
 	overflow: hidden;
 	position: relative;
 	border: solid 1px #000;
-	box-sizing: border-box;
-
-	*, *:before, *:after {
-		box-sizing: border-box;
-	}
+	@include border-box;
 
 	button {
 		width: 3rem;
@@ -112,11 +108,11 @@
 		}
 
 		&-zoomin {
-			background-image: url('../img/icon-zoomin.svg');
+			background-image: url("../img/icon-zoomin.svg");
 		}
 
 		&-zoomout {
-			background-image: url('../img/icon-zoomout.svg');
+			background-image: url("../img/icon-zoomout.svg");
 		}
 	}
 
@@ -187,17 +183,7 @@
 			position: relative;
 
 			i {
-				display: inline-block;
-		    background-color: #1B5E20;
-		    color: #F0F4C3;
-		    font-style: normal;
-		    font-size: 0.875em;
-		    padding: 0 5px;
-		    margin: 0;
-		    opacity: 0.5;
-		    position: absolute;
-		    right: 0;
-		    top: 0;
+				@include time-estimate;
 			}
 		}
 
@@ -206,10 +192,62 @@
 		}
 
 		&-closer {
-			background-image: url('../img/icon-close.svg');
+			background-image: url("../img/icon-close.svg");
 			position: absolute;
 			right: 0;
 			top: 0;
+		}
+	}
+
+	&-legend {
+		border: solid 1px #000;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: stretch;
+		overflow: auto;
+		-webkit-overflow-scrolling: touch;
+		height: 400px;
+		@include border-box;
+
+		img {
+			display: none;
+		}
+
+		dt {
+			cursor: pointer;
+			width: 30%;
+			min-height: 128px;
+			background-repeat: no-repeat;
+			background-position: center;
+			margin: 0;
+			border-bottom: solid 1px #ccc;
+		}
+
+		dd {
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			width: 70%;
+			margin: 0;
+			padding: 20px;
+			position: relative;
+			border-bottom: solid 1px #ccc;
+
+			i {
+				@include time-estimate;
+			}
+		}
+
+		&-alternate {
+			background-color: #ddeecc;
+		}
+
+		&-icon {
+			background-size: auto 50%;
+		}
+
+		&-photo {
+			background-size: cover;
 		}
 	}
 }

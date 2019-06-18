@@ -5,45 +5,6 @@ $color-active : #d45800;
 $color-hover : #ff9800;
 $color-disabled : #7f7f7f;
 $color-highlight : #eeeeee;
-$remSize : 12;
-
-@mixin obfuscate ($distance:100, $unit:px) {
-	overflow : hidden;
-	text-align : left;
-	text-indent : ($distance + 10) + $unit;
-	white-space : nowrap;
-}
-
-@mixin iconParent ($size:32, $unit:px) {
-	overflow : hidden;
-	position : relative;
-	text-align : left;
-	text-indent : ($size + 10) + $unit;
-	white-space : nowrap;
-}
-
-@mixin iconCenter ($size:32, $unit:px, $char:'') {
-	content : $char;
-	display : block;
-	@if $char != '' {
-		font-family : FontAwesome;
-		font-size : $size + $unit;
-		line-height : $size + $unit;
-		text-indent : 0;
-		text-align : center;
-	}
-	@if $char == '' {
-		background-repeat: no-repeat;
-		background-size: contain;
-		background-position: center;
-	}
-	height : $size + $unit;
-	width : $size + $unit;
-	position : absolute;
-	left : 50%;
-	top : 50%;
-	transform: translate(-50%, -50%);
-}
 
 @mixin clearfix () {
 	&:after {
@@ -51,4 +12,28 @@ $remSize : 12;
 		content: '';
 		display: table;
 	}
+}
+
+@mixin border-box {
+	box-sizing: border-box;
+
+	*,
+	*:after,
+	*:before {
+		box-sizing: border-box;
+	}
+}
+
+@mixin time-estimate {
+	display: inline-block;
+	background-color: #1B5E20;
+	color: #F0F4C3;
+	font-style: normal;
+	font-size: 0.875em;
+	padding: 0 5px;
+	margin: 0;
+	opacity: 0.5;
+	position: absolute;
+	right: 0;
+	top: 0;
 }

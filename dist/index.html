@@ -33,6 +33,7 @@
 				<!-- Cut below this -->
 				<style>@import url("./css/localmap.css");</style>
 				<figure class="localmap"></figure>
+				<dl class="localmap-legend"></dl>
 				<script src="//www.sydneytrainwalks.com/inc/js/exif-data.js"></script>
 				<script src="./lib/gestures.js"></script>
 				<script src="./js/localmap.js"></script>
@@ -40,6 +41,7 @@
 				//<!--
 					var localmap = new Localmap({
 						'container': document.querySelector('.localmap'),
+						'legend': document.querySelector('.localmap-legend'),
 						'assetsUrl': '//www.sydneytrainwalks.com/inc/',
 						'markersUrl': 'img/marker-{type}.svg',
 						'guideUrl': 'data/adamstown-awabakal-adamstown.json',

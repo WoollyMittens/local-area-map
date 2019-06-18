@@ -89,7 +89,7 @@ var Localmap = function(config) {
 
   this.indicate = function(source, description, lon, lat) {
     // get the coordinates from the cached exif data or failing that the webservice
-    var filename = source.split('/').pop();
+    var filename = (source) ? source.split('/').pop() : null;
     var cached = this.config.exifData[filename];
     // store the marker data somewhere for the sub-component to get it
     this.config.indicator = {
@@ -149,7 +149,8 @@ var Localmap = function(config) {
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this),
-    modal: new this.Modal(this)
+    modal: new this.Modal(this),
+    legend: new this.Legend(this, this.indicate.bind(this))
   };
 
 };
@@ -529,6 +530,63 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 };
 
 // extend the class
+Localmap.prototype.Legend = function (parent, onLegendClicked) {
+
+	// PROPERTIES
+
+	this.parent = parent;
+	this.config = parent.config;
+	this.onLegendClicked = onLegendClicked;
+	this.elements = [];
+
+	// METHODS
+
+	this.start = function() {};
+
+	this.update = function() {
+    // write the legend if needed and available
+    if (this.config.legend && this.elements.length === 0) this.elements = this.config.guideData.markers.map(this.addDefinition.bind(this));
+  };
+
+  this.addDefinition = function(markerData, index) {
+    var definitionData = {};
+    // if the marker has a description
+    if (markerData.description) {
+      // format the path to the external assets
+      var guideData = this.config.guideData;
+      var key = (guideData.assets) ? guideData.assets.prefix : guideData.gps;
+      var image = (markerData.photo) ? this.config.assetsUrl + '/small/' + key + '/' + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
+      var text = markerData.description || markerData.type;
+      // create a container for the elements
+      var fragment = document.createDocumentFragment();
+      // add the title
+      definitionData.title = document.createElement('dt');
+      definitionData.title.className += (markerData.photo) ? ' localmap-legend-photo' : ' localmap-legend-icon';
+      definitionData.title.innerHTML = '<img alt="' + markerData.type + '" src="' + image + '"/>';
+      definitionData.title.style.backgroundImage = 'url("' + image + '")';
+      fragment.appendChild(definitionData.title);
+      // add the description
+      definitionData.description = document.createElement('dd');
+      definitionData.description.className += (markerData.optional || markerData.detour || markerData.warning) ? ' localmap-legend-alternate' : '';
+      definitionData.description.innerHTML = '<p>' + text + '</p>';
+      fragment.appendChild(definitionData.description);
+      // add the event handlers
+      definitionData.title.addEventListener('click', this.onLegendClicked.bind(this, null, null, markerData.lon, markerData.lat));
+      definitionData.description.addEventListener('click', this.onLegendClicked.bind(this, null, null, markerData.lon, markerData.lat));
+      // add the container to the legend
+      this.config.legend.appendChild(fragment);
+    }
+    // return the objects
+    return definitionData;
+  };
+
+	// EVENTS
+
+	this.start();
+
+};
+
+// extend the class
 Localmap.prototype.Location = function (parent) {
 
 	// PROPERTIES
@@ -652,7 +710,6 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';
-
 		return element;
 	};
 
