@@ -40,8 +40,9 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
       definitionData.description.innerHTML = '<p>' + text + '</p>';
       fragment.appendChild(definitionData.description);
       // add the event handlers
-      definitionData.title.addEventListener('click', this.onLegendClicked.bind(this, null, null, markerData.lon, markerData.lat));
-      definitionData.description.addEventListener('click', this.onLegendClicked.bind(this, null, null, markerData.lon, markerData.lat));
+			markerData.referrer = definitionData.title;
+      definitionData.title.addEventListener('click', this.onLegendClicked.bind(this, markerData));
+      definitionData.description.addEventListener('click', this.onLegendClicked.bind(this, markerData));
       // add the container to the legend
       this.config.legend.appendChild(fragment);
     }

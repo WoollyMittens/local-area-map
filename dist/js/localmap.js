@@ -46,7 +46,8 @@ var Localmap = function(config) {
       'description': null,
       'lon': null,
 			'lat': null,
-			'zoom': null
+			'zoom': null,
+      'referrer': null
     }
   };
 
@@ -82,21 +83,33 @@ var Localmap = function(config) {
     this.components.modal.show(markerdata);
   };
 
-  this.end = function() {
+  this.stop = function() {
     // release the container
     this.container.innerHTML = '';
   };
 
-  this.indicate = function(source, description, lon, lat) {
-    // get the coordinates from the cached exif data or failing that the webservice
+  this.indicate = function(input) {
+    // reset the previous
+    this.unindicate();
+    // handle the event if this was used as one
+    if (input.target) input = input.target;
+    // gather the parameters from diverse input
+    if (!input.getAttribute) input.getAttribute = function(attr) { return input[attr]; };
+    if (!input.setAttribute) input.setAttribute = function(attr, value) { input[attr] = value; };
+    var source = input.getAttribute('data-url') || input.getAttribute('src') || input.getAttribute('href') || input.getAttribute('photo');
+    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description');
+    var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
+    var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
+    // try to get the coordinates from the cached exif data
     var filename = (source) ? source.split('/').pop() : null;
     var cached = this.config.exifData[filename];
-    // store the marker data somewhere for the sub-component to get it
+    // populate the indicator's model
     this.config.indicator = {
       'photo': filename,
       'description': description,
       'lon': lon || cached.lon,
-      'lat': lat || cached.lat
+      'lat': lat || cached.lat,
+      'referrer': input.referrer || input
     };
     // if the coordinates are known
     if (this.config.indicator.lon && this.config.indicator.lat) {
@@ -109,6 +122,21 @@ var Localmap = function(config) {
       guideXhr.open('GET', this.config.exifUrl.replace('{src}', source), true);
       guideXhr.send();
     }
+    // cancel any associated events
+    return false;
+  };
+
+  this.unindicate = function() {
+    // de-activate the originating element
+    if (this.config.indicator.referrer) this.config.indicator.referrer.setAttribute('data-localmap', 'passive');
+    // clear the indicator
+    this.config.indicator = { 'icon': null, 'photo': null, 'description': null, 'lon': null, 'lat': null, 'zoom': null, 'origin': null };
+    // de-empasise the focussed location
+    this.focus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
+    // redraw
+    this.update();
+    // cancel any associated events
+    return false;
   };
 
   // EVENTS
@@ -136,6 +164,8 @@ var Localmap = function(config) {
   };
 
   this.onIndicateSuccess = function() {
+    // activate the originating element
+    this.config.indicator.referrer.setAttribute('data-localmap', 'active');
     // highlight a location with an optional description on the map
     this.focus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
     // redraw
@@ -571,8 +601,9 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
       definitionData.description.innerHTML = '<p>' + text + '</p>';
       fragment.appendChild(definitionData.description);
       // add the event handlers
-      definitionData.title.addEventListener('click', this.onLegendClicked.bind(this, null, null, markerData.lon, markerData.lat));
-      definitionData.description.addEventListener('click', this.onLegendClicked.bind(this, null, null, markerData.lon, markerData.lat));
+			markerData.referrer = definitionData.title;
+      definitionData.title.addEventListener('click', this.onLegendClicked.bind(this, markerData));
+      definitionData.description.addEventListener('click', this.onLegendClicked.bind(this, markerData));
       // add the container to the legend
       this.config.legend.appendChild(fragment);
     }
