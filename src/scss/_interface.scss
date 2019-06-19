@@ -70,6 +70,18 @@
 		z-index: 5;
 	}
 
+	&-permissions {
+		position: absolute;
+		left: 0;
+		top: 0;
+		z-index: 9;
+
+		button {
+			background-image: url("../img/icon-location.svg");
+			background-size: 70% auto;
+		}
+	}
+
 	&-waypoint {
 		position: absolute;
 		width: 16px;

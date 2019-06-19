@@ -626,18 +626,27 @@ Localmap.prototype.Location = function (parent) {
 	this.config = parent.config;
 	this.element = new Image();
 	this.zoom = null;
+	this.active = false;
 
 	// METHODS
 
 	this.start = function() {
 		if ("geolocation" in navigator) {
-			// request location updates
-			this.locator = navigator.geolocation.watchPosition(this.onReposition.bind(this));
-			// create the indicator
-			this.element.setAttribute('src', this.config.markersUrl.replace('{type}', 'location'));
-			this.element.setAttribute('alt', '');
-			this.element.setAttribute('class', 'localmap-location');
-			this.parent.element.appendChild(this.element);
+			// display a button to activate geolocation
+			this.permissions = document.createElement('nav');
+			this.permissions.setAttribute('class', 'localmap-permissions');
+			this.button = document.createElement('button');
+			this.button.setAttribute('title', 'Allow geolocation');
+			this.button.innerHTML = 'Allow geolocation';
+			this.button.setAttribute('class', 'localmap-permissions-location');
+			this.permissions.appendChild(this.button);
+			this.config.container.appendChild(this.permissions);
+			// activate geolocation upon interaction
+			this.button.addEventListener('click', this.requestPosition.bind(this));
+			this.config.container.addEventListener('mouseup', this.requestPosition.bind(this));
+			this.config.container.addEventListener('touchend', this.requestPosition.bind(this));
+			// try activating geolocation automatically
+			this.requestPosition();
 		}
 	};
 
@@ -652,6 +661,20 @@ Localmap.prototype.Location = function (parent) {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
 		this.element.style.transform = 'scale(' + scale + ')';
+	};
+
+	this.requestPosition = function() {
+		if (!this.active) {
+			// request location updates
+			this.locator = navigator.geolocation.watchPosition(this.onReposition.bind(this));
+			// create the indicator
+			this.element.setAttribute('src', this.config.markersUrl.replace('{type}', 'location'));
+			this.element.setAttribute('alt', '');
+			this.element.setAttribute('class', 'localmap-location');
+			this.parent.element.appendChild(this.element);
+			// hide the button
+			this.button.style.display = 'none';
+		}
 	};
 
 	// EVENTS

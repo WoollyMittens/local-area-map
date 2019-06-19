@@ -6,6 +6,7 @@
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	height: 400px;
+	margin: 20px 0;
 	@include border-box;
 
 	img {
