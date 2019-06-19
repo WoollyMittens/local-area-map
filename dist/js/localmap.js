@@ -17,12 +17,12 @@ var Localmap = function(config) {
     'assetsUrl': null,
     'markersUrl': null,
     'guideUrl': null,
-    'guideData': null,
     'routeUrl': null,
-    'routeData': null,
     'mapUrl': null,
-    'exifData': null,
     'exifUrl': null,
+    'guideData': null,
+    'routeData': null,
+    'exifData': null,
     'creditsTemplate': null,
     'useTransitions': null,
 		'minimum': {
@@ -89,93 +89,31 @@ var Localmap = function(config) {
   };
 
   this.indicate = function(input) {
+    var canvas = this.components.canvas;
+    var indicator = canvas.components.indicator;
     // reset the previous
-    this.unindicate();
-    // handle the event if this was used as one
-    if (input.target) input = input.target;
-    // gather the parameters from diverse input
-    if (!input.getAttribute) input.getAttribute = function(attr) { return input[attr]; };
-    if (!input.setAttribute) input.setAttribute = function(attr, value) { input[attr] = value; };
-    var source = input.getAttribute('data-url') || input.getAttribute('src') || input.getAttribute('href') || input.getAttribute('photo');
-    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description');
-    var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
-    var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
-    // try to get the coordinates from the cached exif data
-    var filename = (source) ? source.split('/').pop() : null;
-    var cached = this.config.exifData[filename];
-    // populate the indicator's model
-    this.config.indicator = {
-      'photo': filename,
-      'description': description,
-      'lon': lon || cached.lon,
-      'lat': lat || cached.lat,
-      'referrer': input.referrer || input
-    };
-    // if the coordinates are known
-    if (this.config.indicator.lon && this.config.indicator.lat) {
-      // display the indicator immediately
-      this.onIndicateSuccess();
-    } else {
-      // try to retrieve them from the photo
-      var guideXhr = new XMLHttpRequest();
-      guideXhr.addEventListener('load', this.onExifLoaded.bind(this));
-      guideXhr.open('GET', this.config.exifUrl.replace('{src}', source), true);
-      guideXhr.send();
-    }
+    indicator.hide();
+    // ask the indicator to indicate
+    indicator.show(input);
     // cancel any associated events
     return false;
   };
 
   this.unindicate = function() {
-    // de-activate the originating element
-    if (this.config.indicator.referrer) this.config.indicator.referrer.setAttribute('data-localmap', 'passive');
-    // clear the indicator
-    this.config.indicator = { 'icon': null, 'photo': null, 'description': null, 'lon': null, 'lat': null, 'zoom': null, 'origin': null };
-    // de-empasise the focussed location
-    this.focus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
-    // redraw
-    this.update();
+    var canvas = this.components.canvas;
+    var indicator = canvas.components.indicator;
+    // reset the indicator
+    indicator.hide();
     // cancel any associated events
     return false;
   };
 
   // EVENTS
 
-  this.onExifLoaded = function(result) {
-    var exif = JSON.parse(result.target.response);
-    var deg, min, sec, ref, coords = {};
-    // if the exif data contains GPS information
-    if (exif && exif.GPS) {
-      // convert the lon into a usable format
-      deg = parseInt(exif.GPS.GPSLongitude[0]);
-      min = parseInt(exif.GPS.GPSLongitude[1]);
-      sec = parseInt(exif.GPS.GPSLongitude[2]) / 100;
-      ref = exif.GPS.GPSLongitudeRef;
-      this.config.indicator.lon = (deg + min / 60 + sec / 3600) * (ref === "W" ? -1 : 1);
-      // convert the lat into a usable format
-      deg = parseInt(exif.GPS.GPSLatitude[0]);
-      min = parseInt(exif.GPS.GPSLatitude[1]);
-      sec = parseInt(exif.GPS.GPSLatitude[2]) / 100;
-      ref = exif.GPS.GPSLatitudeRef;
-      this.config.indicator.lat = (deg + min / 60 + sec / 3600) * (ref === "N" ? 1 : -1);
-      // return the result
-      this.onIndicateSuccess();
-    }
-  };
-
-  this.onIndicateSuccess = function() {
-    // activate the originating element
-    this.config.indicator.referrer.setAttribute('data-localmap', 'active');
-    // highlight a location with an optional description on the map
-    this.focus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
-    // redraw
-    this.update();
-  };
-
   // CLASSES
 
   this.components = {
-    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this)),
+    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this), this.focus.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this),
@@ -248,7 +186,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 };
 
 // extend the class
-Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClicked) {
+Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClicked, onMapFocus) {
 
 	// PROPERTIES
 
@@ -303,7 +241,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
   this.components = {
 		background: new parent.Background(this, onBackgroundComplete),
 		markers: new parent.Markers(this, onMarkerClicked),
-		indicator: new parent.Indicator(this, onMarkerClicked),
+		indicator: new parent.Indicator(this, onMarkerClicked, onMapFocus),
 		route: new parent.Route(this),
 		location: new parent.Location(this)
   };
@@ -484,7 +422,7 @@ Localmap.prototype.Credits = function (parent) {
 };
 
 // extend the class
-Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
+Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 
 	// PROPERTIES
 
@@ -492,6 +430,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 	this.config = parent.config;
 	this.element = new Image();
 	this.onMarkerClicked = onMarkerClicked;
+	this.onMapFocus = onMapFocus;
 	this.zoom = null;
 	this.lon = null;
 	this.lat = null;
@@ -515,6 +454,49 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 		if (this.lon !== this.config.indicator.lon  && this.lat !== this.config.indicator.lat) this.reposition();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.show = function(input) {
+		// handle the event if this was used as one
+    if (input.target) input = input.target;
+    // gather the parameters from diverse input
+    if (!input.getAttribute) input.getAttribute = function(attr) { return input[attr]; };
+    if (!input.setAttribute) input.setAttribute = function(attr, value) { input[attr] = value; };
+    var source = input.getAttribute('data-url') || input.getAttribute('src') || input.getAttribute('href') || input.getAttribute('photo');
+    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description');
+    var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
+    var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
+    // try to get the coordinates from the cached exif data
+    var filename = (source) ? source.split('/').pop() : null;
+    var cached = this.config.exifData[filename];
+    // populate the indicator's model
+    this.config.indicator = {
+      'photo': filename,
+      'description': description,
+      'lon': lon || cached.lon,
+      'lat': lat || cached.lat,
+      'referrer': input.referrer || input
+    };
+    // if the coordinates are known
+    if (this.config.indicator.lon && this.config.indicator.lat) {
+      // display the indicator immediately
+      this.onIndicateSuccess();
+    } else {
+      // try to retrieve them from the photo
+      var guideXhr = new XMLHttpRequest();
+      guideXhr.addEventListener('load', this.onExifLoaded.bind(this));
+      guideXhr.open('GET', this.config.exifUrl.replace('{src}', source), true);
+      guideXhr.send();
+    }
+	};
+
+	this.hide = function() {
+		// de-activate the originating element
+    if (this.config.indicator.referrer) this.config.indicator.referrer.setAttribute('data-localmap', 'passive');
+    // clear the indicator
+    this.config.indicator = { 'icon': null, 'photo': null, 'description': null, 'lon': null, 'lat': null, 'zoom': null, 'origin': null };
+    // de-empasise the focussed location
+    this.onMapFocus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
 	};
 
 	this.resize = function() {
@@ -548,6 +530,35 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 	};
 
 	// EVENTS
+
+	this.onExifLoaded = function(result) {
+    var exif = JSON.parse(result.target.response);
+    var deg, min, sec, ref, coords = {};
+    // if the exif data contains GPS information
+    if (exif && exif.GPS) {
+      // convert the lon into a usable format
+      deg = parseInt(exif.GPS.GPSLongitude[0]);
+      min = parseInt(exif.GPS.GPSLongitude[1]);
+      sec = parseInt(exif.GPS.GPSLongitude[2]) / 100;
+      ref = exif.GPS.GPSLongitudeRef;
+      this.config.indicator.lon = (deg + min / 60 + sec / 3600) * (ref === "W" ? -1 : 1);
+      // convert the lat into a usable format
+      deg = parseInt(exif.GPS.GPSLatitude[0]);
+      min = parseInt(exif.GPS.GPSLatitude[1]);
+      sec = parseInt(exif.GPS.GPSLatitude[2]) / 100;
+      ref = exif.GPS.GPSLatitudeRef;
+      this.config.indicator.lat = (deg + min / 60 + sec / 3600) * (ref === "N" ? 1 : -1);
+      // return the result
+      this.onIndicateSuccess();
+    }
+  };
+
+  this.onIndicateSuccess = function() {
+    // activate the originating element
+    this.config.indicator.referrer.setAttribute('data-localmap', 'active');
+    // highlight a location with an optional description on the map
+    this.onMapFocus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
+  };
 
 	this.onIndicatorClicked = function(evt) {
 		evt.preventDefault();
@@ -715,12 +726,21 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	// METHODS
 
 	this.start = function() {
-		// load the guide
-		var guideXhr = new XMLHttpRequest();
-		guideXhr.addEventListener('load', this.onGuideLoaded.bind(this));
-		guideXhr.open('GET', this.config.guideUrl, true);
-		guideXhr.send();
+		// if cached data is available
+		if (this.config.guideData) {
+			// add the markers from the guide
+			this.addGuide();
+		// otherwise
+		} else {
+			// load the guide's JSON first
+			var guideXhr = new XMLHttpRequest();
+			guideXhr.addEventListener('load', this.onGuideLoaded.bind(this));
+			guideXhr.open('GET', this.config.guideUrl, true);
+			guideXhr.send();
+		}
 	};
+
+	// TODO: use cached data or load the JSON file
 
 	this.update = function() {
 		// only resize if the zoom has changed
@@ -740,6 +760,13 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.addGuide = function() {
 		var config = this.config;
 		var guideData = this.config.guideData;
+		// store the interpolation limits
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		min.lon = guideData.bounds.west;
+		min.lat = guideData.bounds.north;
+		max.lon = guideData.bounds.east;
+		max.lat = guideData.bounds.south;
 		// store the initial position
 		config.position.lon = (config.maximum.lon - config.minimum.lon) / 2;
 		config.position.lat = (config.maximum.lat - config.minimum.lat) / 2;
@@ -783,16 +810,8 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	// EVENTS
 
 	this.onGuideLoaded = function(evt) {
-		var min = this.config.minimum;
-		var max = this.config.maximum;
 		// decode the guide data
 		this.config.guideData = JSON.parse(evt.target.response);
-		// extract the interpolation limits
-		var guideData = this.config.guideData;
-		min.lon = guideData.bounds.west;
-		min.lat = guideData.bounds.north;
-		max.lon = guideData.bounds.east;
-		max.lat = guideData.bounds.south;
 		// add the markers from the guide
 		this.addGuide();
 	};
@@ -878,16 +897,22 @@ Localmap.prototype.Route = function (parent) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.elements = [];
+	this.coordinates = [];
 	this.zoom = null;
 
 	// METHODS
 
 	this.start = function() {
-		// load the route
-		var routeXhr = new XMLHttpRequest();
-		routeXhr.addEventListener('load', this.onRouteLoaded.bind(this));
-		routeXhr.open('GET', this.config.routeUrl, true);
-		routeXhr.send();
+		// use the JSON immediately
+		if (this.config.routeData) {
+			this.onJsonLoaded(this.config.routeData);
+		// or load the route's GPX first
+		} else {
+			var routeXhr = new XMLHttpRequest();
+			routeXhr.addEventListener('load', this.onGpxLoaded.bind(this));
+			routeXhr.open('GET', this.config.routeUrl, true);
+			routeXhr.send();
+		}
 		// create a canvas
 		this.canvas = document.createElement('canvas');
 		this.canvas.setAttribute('class', 'localmap-route')
@@ -906,8 +931,6 @@ Localmap.prototype.Route = function (parent) {
 		this.canvas.width = this.parent.element.offsetWidth;
 		this.canvas.height = this.parent.element.offsetHeight;
 		// position every trackpoint in the route
-		var routeData = this.config.routeData;
-		var trackpoints = routeData.getElementsByTagName('trkpt');
 		var ctx = this.canvas.getContext('2d');
 		// (re)draw the route
 		var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
@@ -915,11 +938,11 @@ Localmap.prototype.Route = function (parent) {
 		ctx.lineWidth = 4 / z;
 		ctx.strokeStyle = 'orange';
 		ctx.beginPath();
-		for (var key in trackpoints) {
-			if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
+		for (var key in this.coordinates) {
+			if (this.coordinates.hasOwnProperty(key) && key % 1 == 0) {
 				if (x = null) ctx.moveTo(x, y);
-				x = parseInt((parseFloat(trackpoints[key].getAttribute('lon')) - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
-				y = parseInt((parseFloat(trackpoints[key].getAttribute('lat')) - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+				x = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
+				y = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
 				ctx.lineTo(x, y);
 			}
 		}
@@ -928,9 +951,29 @@ Localmap.prototype.Route = function (parent) {
 
 	// EVENTS
 
-	this.onRouteLoaded = function(evt) {
-		// decode the xml data
-		this.config.routeData = evt.target.responseXML;
+	this.onJsonLoaded = function (geojson) {
+		// convert JSON into an array of coordinates
+		var features = geojson.features, segments = [], coordinates;
+		for (var a = 0, b = features.length; a < b; a += 1) {
+			if (features[a].geometry.coordinates[0][0] instanceof Array) {
+				coordinates = [].concat.apply([], features[a].geometry.coordinates);
+			} else {
+				coordinates = features[a].geometry.coordinates;
+			}
+			segments.push(coordinates);
+		}
+		this.coordinates = [].concat.apply([], segments);
+	};
+
+	this.onGpxLoaded = function(evt) {
+		// convert GPX into an array of coordinates
+		var gpx = evt.target.responseXML;
+		var trackpoints = gpx.getElementsByTagName('trkpt');
+		for (var key in trackpoints) {
+			if (trackpoints.hasOwnProperty(key) && key % 1 == 0) {
+				this.coordinates.push([parseFloat(trackpoints[key].getAttribute('lon')), parseFloat(trackpoints[key].getAttribute('lat')), null]);
+			}
+		}
 	};
 
 	this.start();

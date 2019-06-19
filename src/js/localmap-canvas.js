@@ -1,5 +1,5 @@
 // extend the class
-Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClicked) {
+Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClicked, onMapFocus) {
 
 	// PROPERTIES
 
@@ -54,7 +54,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
   this.components = {
 		background: new parent.Background(this, onBackgroundComplete),
 		markers: new parent.Markers(this, onMarkerClicked),
-		indicator: new parent.Indicator(this, onMarkerClicked),
+		indicator: new parent.Indicator(this, onMarkerClicked, onMapFocus),
 		route: new parent.Route(this),
 		location: new parent.Location(this)
   };

@@ -17,12 +17,12 @@ var Localmap = function(config) {
     'assetsUrl': null,
     'markersUrl': null,
     'guideUrl': null,
-    'guideData': null,
     'routeUrl': null,
-    'routeData': null,
     'mapUrl': null,
-    'exifData': null,
     'exifUrl': null,
+    'guideData': null,
+    'routeData': null,
+    'exifData': null,
     'creditsTemplate': null,
     'useTransitions': null,
 		'minimum': {
@@ -89,93 +89,31 @@ var Localmap = function(config) {
   };
 
   this.indicate = function(input) {
+    var canvas = this.components.canvas;
+    var indicator = canvas.components.indicator;
     // reset the previous
-    this.unindicate();
-    // handle the event if this was used as one
-    if (input.target) input = input.target;
-    // gather the parameters from diverse input
-    if (!input.getAttribute) input.getAttribute = function(attr) { return input[attr]; };
-    if (!input.setAttribute) input.setAttribute = function(attr, value) { input[attr] = value; };
-    var source = input.getAttribute('data-url') || input.getAttribute('src') || input.getAttribute('href') || input.getAttribute('photo');
-    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description');
-    var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
-    var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
-    // try to get the coordinates from the cached exif data
-    var filename = (source) ? source.split('/').pop() : null;
-    var cached = this.config.exifData[filename];
-    // populate the indicator's model
-    this.config.indicator = {
-      'photo': filename,
-      'description': description,
-      'lon': lon || cached.lon,
-      'lat': lat || cached.lat,
-      'referrer': input.referrer || input
-    };
-    // if the coordinates are known
-    if (this.config.indicator.lon && this.config.indicator.lat) {
-      // display the indicator immediately
-      this.onIndicateSuccess();
-    } else {
-      // try to retrieve them from the photo
-      var guideXhr = new XMLHttpRequest();
-      guideXhr.addEventListener('load', this.onExifLoaded.bind(this));
-      guideXhr.open('GET', this.config.exifUrl.replace('{src}', source), true);
-      guideXhr.send();
-    }
+    indicator.hide();
+    // ask the indicator to indicate
+    indicator.show(input);
     // cancel any associated events
     return false;
   };
 
   this.unindicate = function() {
-    // de-activate the originating element
-    if (this.config.indicator.referrer) this.config.indicator.referrer.setAttribute('data-localmap', 'passive');
-    // clear the indicator
-    this.config.indicator = { 'icon': null, 'photo': null, 'description': null, 'lon': null, 'lat': null, 'zoom': null, 'origin': null };
-    // de-empasise the focussed location
-    this.focus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
-    // redraw
-    this.update();
+    var canvas = this.components.canvas;
+    var indicator = canvas.components.indicator;
+    // reset the indicator
+    indicator.hide();
     // cancel any associated events
     return false;
   };
 
   // EVENTS
 
-  this.onExifLoaded = function(result) {
-    var exif = JSON.parse(result.target.response);
-    var deg, min, sec, ref, coords = {};
-    // if the exif data contains GPS information
-    if (exif && exif.GPS) {
-      // convert the lon into a usable format
-      deg = parseInt(exif.GPS.GPSLongitude[0]);
-      min = parseInt(exif.GPS.GPSLongitude[1]);
-      sec = parseInt(exif.GPS.GPSLongitude[2]) / 100;
-      ref = exif.GPS.GPSLongitudeRef;
-      this.config.indicator.lon = (deg + min / 60 + sec / 3600) * (ref === "W" ? -1 : 1);
-      // convert the lat into a usable format
-      deg = parseInt(exif.GPS.GPSLatitude[0]);
-      min = parseInt(exif.GPS.GPSLatitude[1]);
-      sec = parseInt(exif.GPS.GPSLatitude[2]) / 100;
-      ref = exif.GPS.GPSLatitudeRef;
-      this.config.indicator.lat = (deg + min / 60 + sec / 3600) * (ref === "N" ? 1 : -1);
-      // return the result
-      this.onIndicateSuccess();
-    }
-  };
-
-  this.onIndicateSuccess = function() {
-    // activate the originating element
-    this.config.indicator.referrer.setAttribute('data-localmap', 'active');
-    // highlight a location with an optional description on the map
-    this.focus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
-    // redraw
-    this.update();
-  };
-
   // CLASSES
 
   this.components = {
-    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this)),
+    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this), this.focus.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this),

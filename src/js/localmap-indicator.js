@@ -1,5 +1,5 @@
 // extend the class
-Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
+Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 
 	// PROPERTIES
 
@@ -7,6 +7,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 	this.config = parent.config;
 	this.element = new Image();
 	this.onMarkerClicked = onMarkerClicked;
+	this.onMapFocus = onMapFocus;
 	this.zoom = null;
 	this.lon = null;
 	this.lat = null;
@@ -30,6 +31,49 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 		if (this.lon !== this.config.indicator.lon  && this.lat !== this.config.indicator.lat) this.reposition();
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
+	};
+
+	this.show = function(input) {
+		// handle the event if this was used as one
+    if (input.target) input = input.target;
+    // gather the parameters from diverse input
+    if (!input.getAttribute) input.getAttribute = function(attr) { return input[attr]; };
+    if (!input.setAttribute) input.setAttribute = function(attr, value) { input[attr] = value; };
+    var source = input.getAttribute('data-url') || input.getAttribute('src') || input.getAttribute('href') || input.getAttribute('photo');
+    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description');
+    var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
+    var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
+    // try to get the coordinates from the cached exif data
+    var filename = (source) ? source.split('/').pop() : null;
+    var cached = this.config.exifData[filename];
+    // populate the indicator's model
+    this.config.indicator = {
+      'photo': filename,
+      'description': description,
+      'lon': lon || cached.lon,
+      'lat': lat || cached.lat,
+      'referrer': input.referrer || input
+    };
+    // if the coordinates are known
+    if (this.config.indicator.lon && this.config.indicator.lat) {
+      // display the indicator immediately
+      this.onIndicateSuccess();
+    } else {
+      // try to retrieve them from the photo
+      var guideXhr = new XMLHttpRequest();
+      guideXhr.addEventListener('load', this.onExifLoaded.bind(this));
+      guideXhr.open('GET', this.config.exifUrl.replace('{src}', source), true);
+      guideXhr.send();
+    }
+	};
+
+	this.hide = function() {
+		// de-activate the originating element
+    if (this.config.indicator.referrer) this.config.indicator.referrer.setAttribute('data-localmap', 'passive');
+    // clear the indicator
+    this.config.indicator = { 'icon': null, 'photo': null, 'description': null, 'lon': null, 'lat': null, 'zoom': null, 'origin': null };
+    // de-empasise the focussed location
+    this.onMapFocus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
 	};
 
 	this.resize = function() {
@@ -63,6 +107,35 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked) {
 	};
 
 	// EVENTS
+
+	this.onExifLoaded = function(result) {
+    var exif = JSON.parse(result.target.response);
+    var deg, min, sec, ref, coords = {};
+    // if the exif data contains GPS information
+    if (exif && exif.GPS) {
+      // convert the lon into a usable format
+      deg = parseInt(exif.GPS.GPSLongitude[0]);
+      min = parseInt(exif.GPS.GPSLongitude[1]);
+      sec = parseInt(exif.GPS.GPSLongitude[2]) / 100;
+      ref = exif.GPS.GPSLongitudeRef;
+      this.config.indicator.lon = (deg + min / 60 + sec / 3600) * (ref === "W" ? -1 : 1);
+      // convert the lat into a usable format
+      deg = parseInt(exif.GPS.GPSLatitude[0]);
+      min = parseInt(exif.GPS.GPSLatitude[1]);
+      sec = parseInt(exif.GPS.GPSLatitude[2]) / 100;
+      ref = exif.GPS.GPSLatitudeRef;
+      this.config.indicator.lat = (deg + min / 60 + sec / 3600) * (ref === "N" ? 1 : -1);
+      // return the result
+      this.onIndicateSuccess();
+    }
+  };
+
+  this.onIndicateSuccess = function() {
+    // activate the originating element
+    this.config.indicator.referrer.setAttribute('data-localmap', 'active');
+    // highlight a location with an optional description on the map
+    this.onMapFocus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
+  };
 
 	this.onIndicatorClicked = function(evt) {
 		evt.preventDefault();

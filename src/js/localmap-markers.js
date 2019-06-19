@@ -12,12 +12,21 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	// METHODS
 
 	this.start = function() {
-		// load the guide
-		var guideXhr = new XMLHttpRequest();
-		guideXhr.addEventListener('load', this.onGuideLoaded.bind(this));
-		guideXhr.open('GET', this.config.guideUrl, true);
-		guideXhr.send();
+		// if cached data is available
+		if (this.config.guideData) {
+			// add the markers from the guide
+			this.addGuide();
+		// otherwise
+		} else {
+			// load the guide's JSON first
+			var guideXhr = new XMLHttpRequest();
+			guideXhr.addEventListener('load', this.onGuideLoaded.bind(this));
+			guideXhr.open('GET', this.config.guideUrl, true);
+			guideXhr.send();
+		}
 	};
+
+	// TODO: use cached data or load the JSON file
 
 	this.update = function() {
 		// only resize if the zoom has changed
@@ -37,6 +46,13 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.addGuide = function() {
 		var config = this.config;
 		var guideData = this.config.guideData;
+		// store the interpolation limits
+		var min = this.config.minimum;
+		var max = this.config.maximum;
+		min.lon = guideData.bounds.west;
+		min.lat = guideData.bounds.north;
+		max.lon = guideData.bounds.east;
+		max.lat = guideData.bounds.south;
 		// store the initial position
 		config.position.lon = (config.maximum.lon - config.minimum.lon) / 2;
 		config.position.lat = (config.maximum.lat - config.minimum.lat) / 2;
@@ -80,16 +96,8 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	// EVENTS
 
 	this.onGuideLoaded = function(evt) {
-		var min = this.config.minimum;
-		var max = this.config.maximum;
 		// decode the guide data
 		this.config.guideData = JSON.parse(evt.target.response);
-		// extract the interpolation limits
-		var guideData = this.config.guideData;
-		min.lon = guideData.bounds.west;
-		min.lat = guideData.bounds.north;
-		max.lon = guideData.bounds.east;
-		max.lat = guideData.bounds.south;
 		// add the markers from the guide
 		this.addGuide();
 	};

@@ -15,6 +15,7 @@ The stylesheet is best included in the header of the document.
 This include can be added to the header or placed inline before the script is invoked.
 
 ```html
+<script src="data/guide-data.js"></script>
 <script src="data/exif-data.js"></script>
 <script src="data/gpx-data.js"></script>
 <script src="js/localmap.js"></script>
@@ -25,9 +26,10 @@ Or use [Require.js](https://requirejs.org/).
 ```js
 requirejs([
 	"js/localmap.js",
+	"data/guide-data.js",
 	"data/exif-data.js",
 	"data/gpx-data.js"
-], function(Localmap, ExifData, GpxData) {
+], function(Localmap, GuideData, ExifData, GpxData) {
 	...
 });
 ```
@@ -35,8 +37,9 @@ requirejs([
 Or import into an MVC framework.
 
 ```js
-var ExifData = require('data/exif-data.js');
+var GuideData = require('data/guide-data.js');
 var GpxData = require('data/gpx-data.js');
+var ExifData = require('data/exif-data.js');
 var Localmap = require('js/localmap.js');
 ```
 
@@ -45,23 +48,41 @@ var Localmap = require('js/localmap.js');
 ```javascript
 var localmap = new Localmap({
 	'container': document.querySelector('.localmap'),
-	'markersUrl': 'img/marker-{type}.png',
-	'guideUrl': 'data/milsonspoint-sydneyharbour-manly.js',
-	'routeUrl': 'data/milsonspoint-sydneyharbour-manly.gpx',
-	'mapUrl': 'data/milsonspoint-sydneyharbour-manly.png',
+	'legend': document.querySelector('.localmap-legend'),
+	'assetsUrl': '//www.sydneytrainwalks.com/inc/',
+	'markersUrl': 'img/marker-{type}.svg',
+	'mapUrl': 'data/adamstown-awabakal-adamstown.png',
+	'guideUrl': 'data/adamstown-awabakal-adamstown.json',
+	'routeUrl': 'data/adamstown-awabakal-adamstown.gpx',
+	'exifUrl': 'php/imageexif.php?src=../photos/{src}',
+	'guideData': GuideData['adamstown-awabakal-adamstown'],
+	'routeData': GpxData['adamstown-awabakal-adamstown'],
+	'exifData': ExifData['adamstown-awabakal-adamstown'],
 	'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA'
 });
 ```
 
 **container : {DOM node}** - The HTML DOM element that will contain the map.
 
+**legend : {DOM node}** - Optional HTML DOM element that will contain the legend.
+
+**assetsUrl : {String}** - Template for the path to the photo assets.
+
 **markersUrl : {String}** - Template for the path to the marker images.
+
+**mapUrl : {String}** - Path to the map image to display.
 
 **guideUrl : {String}** - Path to the JSON guide to display.
 
 **routeUrl : {String}** - Path to the GPX route to display.
 
-**mapUrl : {String}** - Path to the map image to display.
+**exifUrl : {String}** - Path a webservice that extracts geolocation data from photos.
+
+**guideData : {String}** - A local cache JSON guides.
+
+**routeData : {String}** - A local cache of GPX routes.
+
+**exifData : {String}** - A local cache of geolocation data from photos.
 
 **creditsTemplate : {String}** - Template for the map's copyright notice.
 
@@ -70,16 +91,20 @@ var localmap = new Localmap({
 ### Indicate
 
 ```javascript
-localmap.show(lon, lat, zoom);
+photomap.indicate(element);
 ```
 
 Highlights and centres a specific location.
 
-**lon : {String}** - Longitude to zoom in on.
+**element : {DOM node}** - Reference to a link or image for which EXIF geolocation data is available.
 
-**lat : {String}** - Latitude to zoom in on.
+### Unindicate
 
-**zoom : {String}** - How far to zoom in.
+```javascript
+photomap.unindicate(element);
+```
+
+Reset the map after "indicate" was used.
 
 ## How to build the script
 

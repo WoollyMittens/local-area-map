@@ -35,7 +35,9 @@
 				<style>@import url("./css/localmap.css");</style>
 				<figure class="localmap"></figure>
 				<dl class="localmap-legend"></dl>
-				<script src="//www.sydneytrainwalks.com/inc/js/exif-data.js"></script>
+				<script src="./cache/guide-data.js"></script>
+				<script src="./cache/gpx-data.js"></script>
+				<script src="./cache/exif-data.js"></script>
 				<script src="./lib/gestures.js"></script>
 				<script src="./js/localmap.js"></script>
 				<script>
@@ -48,8 +50,10 @@
 						'guideUrl': 'data/adamstown-awabakal-adamstown.json',
 						'routeUrl': 'data/adamstown-awabakal-adamstown.gpx',
 						'mapUrl': 'data/adamstown-awabakal-adamstown.png',
-						'exifData': ExifData['adamstown-awabakal-adamstown'],
 						'exifUrl': 'php/imageexif.php?src=../photos/{src}',
+						'guideData': GuideData['adamstown-awabakal-adamstown'],
+						'routeData': GpxData['adamstown-awabakal-adamstown'],
+						'exifData': ExifData['adamstown-awabakal-adamstown'],
 						'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA'
 					});
 				//-->

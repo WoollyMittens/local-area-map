@@ -96,6 +96,7 @@ function task_assets(cb) {
 	gulp.src('src/xml/**/*').pipe(gulp.dest('dist/xml/'));
 	gulp.src('src/lib/**/*').pipe(gulp.dest('dist/lib/'));
 	gulp.src('src/data/**/*').pipe(gulp.dest('dist/data/'));
+	gulp.src('src/cache/**/*').pipe(gulp.dest('dist/cache/'));
 	gulp.src('src/tiles/**/*').pipe(gulp.dest('dist/tiles/'));
 	gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts/'));
 	gulp.src('src/json/**/*').pipe(gulp.dest('dist/json/'));
