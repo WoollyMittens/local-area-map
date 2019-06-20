@@ -92,7 +92,7 @@ var Localmap = function(config) {
     var canvas = this.components.canvas;
     var indicator = canvas.components.indicator;
     // reset the previous
-    indicator.hide();
+    indicator.reset();
     // ask the indicator to indicate
     indicator.show(input);
     // cancel any associated events

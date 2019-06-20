@@ -92,7 +92,7 @@ var Localmap = function(config) {
     var canvas = this.components.canvas;
     var indicator = canvas.components.indicator;
     // reset the previous
-    indicator.hide();
+    indicator.reset();
     // ask the indicator to indicate
     indicator.show(input);
     // cancel any associated events
@@ -457,6 +457,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 	};
 
 	this.show = function(input) {
+		console.log('indicator.show', input);
 		// handle the event if this was used as one
     if (input.target) input = input.target;
     // gather the parameters from diverse input
@@ -468,13 +469,14 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
     var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
     // try to get the coordinates from the cached exif data
     var filename = (source) ? source.split('/').pop() : null;
-    var cached = this.config.exifData[filename];
+    var cached = (this.config.exifData) ? this.config.exifData[filename] : {};
     // populate the indicator's model
     this.config.indicator = {
       'photo': filename,
       'description': description,
       'lon': lon || cached.lon,
       'lat': lat || cached.lat,
+			'zoom': this.config.maximum.zoom,
       'referrer': input.referrer || input
     };
     // if the coordinates are known
@@ -490,12 +492,17 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
     }
 	};
 
-	this.hide = function() {
+	this.reset = function() {
 		// de-activate the originating element
     if (this.config.indicator.referrer) this.config.indicator.referrer.setAttribute('data-localmap', 'passive');
     // clear the indicator
     this.config.indicator = { 'icon': null, 'photo': null, 'description': null, 'lon': null, 'lat': null, 'zoom': null, 'origin': null };
-    // de-empasise the focussed location
+	};
+
+	this.hide = function() {
+		// reset the indicator object
+		this.reset();
+    // zoom out a little
     this.onMapFocus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
 	};
 
@@ -557,7 +564,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
     // activate the originating element
     this.config.indicator.referrer.setAttribute('data-localmap', 'active');
     // highlight a location with an optional description on the map
-    this.onMapFocus(this.config.indicator.lon, this.config.indicator.lat, this.config.maximum.zoom, true);
+    this.onMapFocus(this.config.indicator.lon, this.config.indicator.lat, this.config.indicator.zoom, true);
   };
 
 	this.onIndicatorClicked = function(evt) {
@@ -750,6 +757,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.resize = function() {
+		console.log('markers resize', this.config.position.zoom);
 		// resize the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {

@@ -36,6 +36,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.resize = function() {
+		console.log('markers resize', this.config.position.zoom);
 		// resize the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
