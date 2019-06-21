@@ -232,7 +232,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		offsetX = Math.max(Math.min(offsetX, 0), container.offsetWidth - element.offsetWidth * zoom);
 		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom);
 		// position the background
-		if (this.config.useTransitions) element.style.transition = 'transform ease 300ms';
+		if (this.config.useTransitions) this.element.className += ' localmap-canvas-transition';
 		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
 	};
 
@@ -250,7 +250,7 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 
 	this.onUpdated = function (evt) {
 		// remove the transition
-		this.element.style.transition = null;
+		this.element.className = this.element.className.replace(/ localmap-canvas-transition/g, '');
 	};
 
 	this.start();
