@@ -101,6 +101,7 @@ function task_assets(cb) {
 	gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts/'));
 	gulp.src('src/json/**/*').pipe(gulp.dest('dist/json/'));
 	gulp.src('src/photos/**/*').pipe(gulp.dest('dist/photos/'));
+	gulp.src('src/php/**/*').pipe(gulp.dest('dist/php/'));
 	cb();
 }
 

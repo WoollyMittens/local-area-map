@@ -20,12 +20,12 @@
 				<p>Plots GPS data on an interactive offline map of the local area.</p>
 				<p><a class="button downloadButton" href="http://github.com/WoollyMittens/useful-localmap" target="_blank">Download (GitHub)</a></p>
 				<ul class="sample-photos">
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130009.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./photos/adamstown-awabakal-adamstown/pb130009.jpg')">1. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130071.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./photos/adamstown-awabakal-adamstown/pb130071.jpg')">2. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130078_pb130086.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./photos/adamstown-awabakal-adamstown/pb130078_pb130086.jpg')">3. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130101_pb130106.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./photos/adamstown-awabakal-adamstown/pb130101_pb130106.jpg')">4. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130153_pb130162.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./photos/adamstown-awabakal-adamstown/pb130153_pb130162.jpg')">5. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130169.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./photos/adamstown-awabakal-adamstown/pb130169.jpg')">6. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./data/adamstown-awabakal-adamstown/pb130009.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./data/adamstown-awabakal-adamstown/pb130009.jpg')">1. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./data/adamstown-awabakal-adamstown/pb130071.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./data/adamstown-awabakal-adamstown/pb130071.jpg')">2. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./data/adamstown-awabakal-adamstown/pb130078_pb130086.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./data/adamstown-awabakal-adamstown/pb130078_pb130086.jpg')">3. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./data/adamstown-awabakal-adamstown/pb130101_pb130106.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./data/adamstown-awabakal-adamstown/pb130101_pb130106.jpg')">4. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./data/adamstown-awabakal-adamstown/pb130153_pb130162.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./data/adamstown-awabakal-adamstown/pb130153_pb130162.jpg')">5. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./data/adamstown-awabakal-adamstown/pb130169.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./data/adamstown-awabakal-adamstown/pb130169.jpg')">6. Lorem ipsum dolor sit amet.</a></li>
 				</ul>
 				<p><a href="#" onclick="localmap.unindicate()">Reset</a></p>
 			</article>
@@ -44,7 +44,7 @@
 					var localmap = new Localmap({
 						'container': document.querySelector('.localmap'),
 						'legend': document.querySelector('.localmap-legend'),
-						'assetsUrl': '//www.sydneytrainwalks.com/inc/',
+						'assetsUrl': './data',
 						'markersUrl': 'img/marker-{type}.svg',
 						'guideUrl': 'data/adamstown-awabakal-adamstown.json',
 						'routeUrl': 'data/adamstown-awabakal-adamstown.gpx',

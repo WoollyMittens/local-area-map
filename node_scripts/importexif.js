@@ -1,8 +1,9 @@
 // constants
 var ex = require('exif');
 var fs = require('fs');
-var source = './src/img/';
-var destination = './src/json/exif-data.js';
+var source = '../src/data/';
+var destPath = '../src/cache/exif-data.js';
+var jsonPath = '../src/cache/photos.json';
 var exifs = {};
 
 // generates a resize queue
@@ -10,12 +11,12 @@ var generateQueue = function () {
 	// get the folder list
 	var queue = [], images = [], srcPath, dstPath,
 		folders = fs.readdirSync(source),
-		isInvisible = new RegExp('^[.]'),
+		isInvisible = new RegExp('^[.]|.json$|.gpx$|.png$'),
 		isPhoto = new RegExp('.jpg$', 'i');
 	// for every folder
 	for (var a = 0, b = folders.length; a < b; a += 1) {
 		// if this isn't a bogus folder
-		if (fs.lstatSync(source + folders[a]).isDirectory() && !isInvisible.test(folders[a])) {
+		if (!isInvisible.test(folders[a])) {
 			// get the folder contents
 			images = fs.readdirSync(source + folders[a]);
 			// for every image in the folder
@@ -45,9 +46,7 @@ var parseImages = function (queue) {
 			if (error) {
 				console.log('ERROR: ' + error);
 			} else {
-				var deg, min, sec, ref, lon, lat;
-				// report what was done
-				console.log('indexed:', source + item.folder + '/' + item.image);
+				var deg, min, sec, ref, lon, lat, time;
 				// convert the lat into a usable format
 				deg = exifData.gps.GPSLatitude[0];
 				min = exifData.gps.GPSLatitude[1];
@@ -63,6 +62,8 @@ var parseImages = function (queue) {
 				// add the relevant exif data to the list
 				exifs[item.folder] = exifs[item.folder] || {};
 				exifs[item.folder][item.image.toLowerCase()] = { 'lon' : lon, 'lat' : lat };
+				// report what was done
+				console.log('indexed:', source + item.folder + '/' + item.image);
 				// remove the item from the queue
 				queue.length = queue.length - 1;
 				// next iteration in the queue
@@ -70,12 +71,21 @@ var parseImages = function (queue) {
 			}
 		});
 	} else {
-		// write the exif data to disk
-		fs.writeFile(destination, 'var ExifData = ' + JSON.stringify(exifs) + ';', function (error) {
+		var data = JSON.stringify(exifs);
+		// export as json
+		fs.writeFile(jsonPath, data, function (error) {
 			if (error) {
 				console.log('ERROR: ' + error);
 			} else {
-				console.log('SAVED AS: ' + destination);
+				console.log('SAVED AS: ' + jsonPath);
+			}
+		});
+		// write the exif data to disk
+		fs.writeFile(destPath, 'var ExifData = ' + data + ';', function (error) {
+			if (error) {
+				console.log('ERROR: ' + error);
+			} else {
+				console.log('SAVED AS: ' + destPath);
 			}
 		});
 	}

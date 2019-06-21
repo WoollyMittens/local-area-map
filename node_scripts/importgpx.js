@@ -1,10 +1,13 @@
 // constants
 var fs = require('fs');
 var tg = require('../src/lib/togeojson.js');
-var jd = require('jsdom').jsdom;
-var source = './src/xml/';
-var destination = './src/json/gpx-data.js';
+var jd = require('jsdom');
+var source = '../src/data/';
+var destPath = '../src/cache/gpx-data.js';
+var jsonPath = '../src/cache/routes.json';
 var geojsons = {};
+
+const { JSDOM } = jd;
 
 // generates a resize queue
 var generateQueue = function () {
@@ -12,7 +15,7 @@ var generateQueue = function () {
 	var queue = [], srcPath, dstPath,
 		files = fs.readdirSync(source),
 		isInvisible = new RegExp('^[.]'),
-		isGpx = new RegExp('.gpx$|.xml$', 'i');
+		isGpx = new RegExp('.gpx$', 'i');
 	// for every file in the folder
 	for (var a = 0, b = files.length; a < b; a += 1) {
 		// if this isn't a bogus file
@@ -41,7 +44,12 @@ var parseFiles = function (queue) {
 				// report what was done
 				console.log('indexed:', source + file);
 				// convert the data into xml dom
-				var xml = jd(data);
+				var xml = new JSDOM(data).window.document;
+				// eliminate every second trackpoint
+				var trkpt = xml.getElementsByTagName('trkpt');
+				for (var a = trkpt.length - 2, b = 0; a > b; a -= 2) {
+					trkpt[a].parentNode.removeChild(trkpt[a]);
+				}
 				// convert the GPX into geoJson
 				var geojson = toGeoJSON.gpx(xml);
 				// add the geoJson object to the list
@@ -53,12 +61,21 @@ var parseFiles = function (queue) {
 			}
 		});
 	} else {
-		// write the exif data to disk
-		fs.writeFile(destination, 'var GpxData = ' + JSON.stringify(geojsons) + ';', function (error) {
+		var data = JSON.stringify(geojsons);
+		// export as json
+		fs.writeFile(jsonPath, data, function (error) {
 			if (error) {
 				console.log('ERROR: ' + error);
 			} else {
-				console.log('SAVED AS: ' + destination);
+				console.log('SAVED AS: ' + jsonPath);
+			}
+		});
+		// write the exif data to disk
+		fs.writeFile(destPath, 'var GpxData = ' + data + ';', function (error) {
+			if (error) {
+				console.log('ERROR: ' + error);
+			} else {
+				console.log('SAVED AS: ' + destPath);
 			}
 		});
 	}
