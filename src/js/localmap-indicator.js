@@ -16,7 +16,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 
 	this.start = function() {
 		// create the indicator
-		this.element.setAttribute('src', this.config.markersUrl.replace('{type}', 'indicator'));
+		this.element.setAttribute('src', this.config.markersUrl.replace('{type}', 'focus'));
 		this.element.setAttribute('alt', '');
 		this.element.setAttribute('class', 'localmap-indicator');
 		// get marker data from API call
@@ -41,7 +41,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
     if (!input.getAttribute) input.getAttribute = function(attr) { return input[attr]; };
     if (!input.setAttribute) input.setAttribute = function(attr, value) { input[attr] = value; };
     var source = input.getAttribute('data-url') || input.getAttribute('src') || input.getAttribute('href') || input.getAttribute('photo');
-    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description');
+    var description = input.getAttribute('data-title') || input.getAttribute('title') || input.getAttribute('description') || input.innerHTML;
     var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
     var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
     // try to get the coordinates from the cached exif data
