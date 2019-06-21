@@ -174,7 +174,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var max = this.config.maximum;
 		// extract the interpolation limits
 		min.zoom = Math.max(container.offsetWidth / this.element.naturalWidth, container.offsetHeight / this.element.naturalHeight);
-		max.zoom = 2;
+		max.zoom = 1.5;
 		// center the background
 		this.redraw();
 		// resolve the promise
