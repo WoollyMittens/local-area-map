@@ -771,10 +771,10 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		// store the interpolation limits
 		var min = this.config.minimum;
 		var max = this.config.maximum;
-		min.lon = guideData.bounds.west;
-		min.lat = guideData.bounds.north;
-		max.lon = guideData.bounds.east;
-		max.lat = guideData.bounds.south;
+		min.lon = (this.config.bounds) ? this.config.bounds.west : guideData.bounds.west;
+		min.lat = (this.config.bounds) ? this.config.bounds.north : guideData.bounds.north;
+		max.lon = (this.config.bounds) ? this.config.bounds.east : guideData.bounds.east;
+		max.lat = (this.config.bounds) ? this.config.bounds.south : guideData.bounds.south;
 		// store the initial position
 		config.position.lon = (config.maximum.lon - config.minimum.lon) / 2;
 		config.position.lat = (config.maximum.lat - config.minimum.lat) / 2;

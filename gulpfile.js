@@ -124,10 +124,7 @@ function task_styles_dev(cb) {
   	.pipe(sourcemaps.init())
 		.pipe(sass())
 		.on('error', sass.logError)
-		.pipe(autoprefixer({
-			browsers: ['last 2 versions'],
-			cascade: false
-		}))
+		.pipe(autoprefixer())
   	.pipe(sourcemaps.write())
 		.pipe(gulp.dest('dist/css/'));
 	cb();
@@ -138,10 +135,7 @@ function task_styles_dist(cb) {
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
-		.pipe(autoprefixer({
-			browsers: ['last 2 versions'],
-			cascade: false
-		}))
+		.pipe(autoprefixer())
 		.pipe(gulp.dest('dist/css/'));
 	cb();
 }
