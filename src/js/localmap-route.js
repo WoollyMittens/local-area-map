@@ -36,6 +36,7 @@ Localmap.prototype.Route = function (parent) {
 	};
 
 	this.redraw = function() {
+// TODO: allow drawing of an array of routes
 		// adjust the height of the canvas
 		this.canvas.width = this.parent.element.offsetWidth;
 		this.canvas.height = this.parent.element.offsetHeight;

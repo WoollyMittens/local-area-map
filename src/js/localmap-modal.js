@@ -34,13 +34,10 @@ Localmap.prototype.Modal = function (parent) {
 	this.update = function() {};
 
 	this.show = function(markerData) {
-
-// TODO: if there is no photo use the icon but as an aside
-
 		// display the photo if available
 		if (markerData.photo) {
 			this.photo.style.display = null;
-			this.photo.style.backgroundImage = 'url(' + this.config.assetsUrl + 'medium/' + this.config.guideData.gps + '/' + markerData.photo + ')';
+			this.photo.style.backgroundImage = 'url(' + this.config.assetsUrl + markerData.photo + ')';
 		} else {
 			this.photo.style.display = 'none';
 		}
