@@ -38,19 +38,18 @@
 				<script src="./cache/guide-data.js"></script>
 				<script src="./cache/gpx-data.js"></script>
 				<script src="./cache/exif-data.js"></script>
-				<script src="./lib/gestures.js"></script>
 				<script src="./js/localmap.js"></script>
 				<script>
 					var localmap = new Localmap({
 						'container': document.querySelector('.localmap'),
 						'legend': document.querySelector('.localmap-legend'),
-						'thumbsUrl': 'data/adamstown-awabakal-adamstown/',
-						'photosUrl': 'data/adamstown-awabakal-adamstown/',
-						'markersUrl': 'img/marker-{type}.svg',
-						'guideUrl': 'data/adamstown-awabakal-adamstown.json',
-						'routeUrl': 'data/adamstown-awabakal-adamstown.gpx',
-						'mapUrl': 'data/adamstown-awabakal-adamstown.png',
-						'exifUrl': 'php/imageexif.php?src=../{src}',
+						'thumbsUrl': './data/adamstown-awabakal-adamstown/',
+						'photosUrl': './data/adamstown-awabakal-adamstown/',
+						'markersUrl': './img/marker-{type}.svg',
+						'guideUrl': './data/adamstown-awabakal-adamstown.json',
+						'routeUrl': './data/adamstown-awabakal-adamstown.gpx',
+						'mapUrl': './data/adamstown-awabakal-adamstown.png',
+						'exifUrl': './php/imageexif.php?src=../{src}',
 						'guideData': GuideData['adamstown-awabakal-adamstown'],
 						'routeData': GpxData['adamstown-awabakal-adamstown'],
 						'exifData': ExifData['adamstown-awabakal-adamstown'],

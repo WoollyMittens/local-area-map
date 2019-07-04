@@ -137,8 +137,11 @@ The following commands are available for development:
 + `gulp watch` - Continuously recompiles updated files during development sessions.
 + `gulp serve` - Serves the project on a temporary web server at http://localhost:8500/.
 + `gulp php` - Serves the project on a temporary php server at http://localhost:8500/.
-+ `node node_scripts/importexif.js` - Imports EXIF data and creates a JSON cache file.
-+ `node node_scripts/importgpx.js` - Imports GPS data and creates a JSON cache file.
++ `cd node_scripts`
+	+ `node importexif` - Prepare a cache of GPS data of all the photos.
+	+ `node importgpx` - Prepare a cache of GPS data of all routes.
+	+ `node importguides` - Prepare a cache of JSON data for all the guides.
+	+ `node importmaps` - Downloads the required map tiles from an OpenStreetMap server".
 
 ## License
 
