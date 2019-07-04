@@ -31,6 +31,11 @@ Localmap.prototype.Location = function (parent) {
 		}
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.permissions);
+  };
+
 	this.update = function() {
 		// only resize if the zoom has changed
 		if (this.zoom !== this.config.position.zoom) this.resize();

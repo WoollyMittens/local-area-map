@@ -12,6 +12,11 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
 
 	this.start = function() {};
 
+  this.stop = function() {
+    // remove the element
+    if (this.config.legend) this.config.legend.innerHTML = '';
+  };
+
 	this.update = function() {
     // write the legend if needed and available
     if (this.config.legend && this.elements.length === 0) this.elements = this.config.guideData.markers.map(this.addDefinition.bind(this));
@@ -24,7 +29,7 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
       // format the path to the external assets
       var guideData = this.config.guideData;
       var key = (guideData.assets) ? guideData.assets.prefix : guideData.gps;
-      var image = (markerData.photo) ? this.config.assetsUrl + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
+      var image = (markerData.photo) ? this.config.thumbsUrl + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
       var text = markerData.description || markerData.type;
       // create a container for the elements
       var fragment = document.createDocumentFragment();

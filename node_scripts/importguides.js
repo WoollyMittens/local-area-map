@@ -1,5 +1,6 @@
 // constants
 var fs = require('fs');
+var guidesData = require('../src/cache/guides.json');
 var exifData = require('../src/cache/photos.json');
 var gpsData = require('../src/cache/routes.json');
 var source = '../src/data/';
@@ -28,7 +29,7 @@ var generateQueue = function () {
 	// get the file list
 	var queue = [], srcPath, dstPath,
 		scripts = fs.readdirSync(source),
-		isScript = new RegExp('.js$|.json$', 'i');
+		isScript = new RegExp('.json$', 'i');
 	// for every script in the folder
 	for (var a = 0, b = scripts.length; a < b; a += 1) {
 		// if this isn't a bogus file
@@ -43,12 +44,49 @@ var generateQueue = function () {
 	return queue.reverse();
 };
 
+// compile a summary of the guide in the output file
+var addIndex = function () {
+	var overview = {
+		'gps': '_index',
+		'bounds': {},
+		'markers': []
+	};
+	// for every guide
+	var north = -999, west = 999, south = 999, east = -999;
+	for (var key in GuideData) {
+		// expand the bounds based on the guides
+		north = Math.max(GuideData[key].bounds.north, north);
+		west = Math.min(GuideData[key].bounds.west, west);
+		south = Math.min(GuideData[key].bounds.south, south);
+		east = Math.max(GuideData[key].bounds.east, east);
+		// add a marker from the centre of the guide
+		overview.markers.push({
+			'type': 'walk',
+			'lon': GuideData[key].lon,
+			'lat': GuideData[key].lat,
+			'id': key
+		});
+	}
+	// expand the bounds by one map tile
+	north = tile2lat(lat2tile(north, 11) - 1, 11);
+	west = tile2long(long2tile(west, 11) - 1, 11);
+	south = tile2lat(lat2tile(south, 11) + 2, 11);
+	east = tile2long(long2tile(east, 11) + 2, 11);
+	// align the bounds to the tile grid
+	overview.bounds.north = tile2lat(lat2tile(north, 11), 11);
+	overview.bounds.west = tile2long(long2tile(west, 11), 11);
+	overview.bounds.south = tile2lat(lat2tile(south, 11), 11);
+	overview.bounds.east = tile2long(long2tile(east, 11), 11);
+	// insert the index into the guides
+	GuideData['_index'] = overview;
+};
+
 // processes a script from the queue the master json object
 var parseGuides = function (queue) {
 	// if the queue is not empty
 	if (queue.length > 0) {
 		// pick an item from the queue
-		var item = queue[queue.length - 1];
+		var item = queue.pop();
 		// process the item in the queue
 		new fs.readFile(source + item, function (error, data) {
 			if (error) {
@@ -90,26 +128,31 @@ var parseGuides = function (queue) {
 					south = Math.min(routeData[a][1], south);
 					east = Math.max(routeData[a][0], east);
 				}
-				// convert the bounds to tiles
+				// expand the bounds by one map tile
 				north = tile2lat(lat2tile(north, 15) - 1, 15);
 				west = tile2long(long2tile(west, 15) - 1, 15);
 				south = tile2lat(lat2tile(south, 15) + 2, 15);
 				east = tile2long(long2tile(east, 15) + 2, 15);
-				// reconvert to align the bounds to the tile grid
+				// align the bounds to the tile grid
 				GuideData[key].bounds.north = tile2lat(lat2tile(north, 15), 15);
 				GuideData[key].bounds.west = tile2long(long2tile(west, 15), 15);
 				GuideData[key].bounds.south = tile2lat(lat2tile(south, 15), 15);
 				GuideData[key].bounds.east = tile2long(long2tile(east, 15), 15);
+				// prefill the "bounds" from guides that are a subset of another guide
+				if (GuideData[key].assets && guidesData[prefix] && guidesData[prefix].bounds) {
+					var prefix = GuideData[key].assets.prefix;
+					GuideData[key].assets.bounds = guidesData[prefix].bounds;
+				}
 				// save the converted guide
 				fs.writeFile(source + item, JSON.stringify(GuideData[key]), function (error) {
-					// remove the item from the queue
-					queue.length = queue.length - 1;
 					// next iteration in the queue
 					parseGuides(queue);
 				});
 			}
 		});
 	} else {
+		// add the index
+		//addIndex();
 		// convert to string
 		var data = JSON.stringify(GuideData);
 		// write the JSON data to disk

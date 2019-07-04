@@ -28,6 +28,11 @@ Localmap.prototype.Route = function (parent) {
 		this.parent.element.appendChild(this.canvas);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.parent.element.removeChild(this.canvas);
+  };
+
 	this.update = function() {
 		// only redraw if the zoom has changed
 		if (this.zoom !== this.config.position.zoom) this.redraw();
@@ -36,24 +41,29 @@ Localmap.prototype.Route = function (parent) {
 	};
 
 	this.redraw = function() {
-// TODO: allow drawing of an array of routes
 		// adjust the height of the canvas
 		this.canvas.width = this.parent.element.offsetWidth;
 		this.canvas.height = this.parent.element.offsetHeight;
 		// position every trackpoint in the route
 		var ctx = this.canvas.getContext('2d');
 		// (re)draw the route
-		var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
+		var x0, y0, x1, y1, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
 		ctx.clearRect(0, 0, w, h);
 		ctx.lineWidth = 4 / z;
 		ctx.strokeStyle = 'orange';
 		ctx.beginPath();
 		for (var key in this.coordinates) {
 			if (this.coordinates.hasOwnProperty(key) && key % 1 == 0) {
-				if (x = null) ctx.moveTo(x, y);
-				x = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
-				y = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
-				ctx.lineTo(x, y);
+        // calculate the current step
+				x1 = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
+				y1 = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+        // if the step seems valid, draw the step
+  			if ((Math.abs(x1 - x0) + Math.abs(y1 - y0)) < 50) { ctx.lineTo(x1, y1); }
+        // or jump unlikely/erroneous steps
+        else { ctx.moveTo(x1, y1); }
+        // store current step as the previous step
+        x0 = x1;
+        y0 = y1;
 			}
 		}
 		ctx.stroke();

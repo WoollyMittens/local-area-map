@@ -30,7 +30,10 @@ Localmap.prototype.Controls = function (parent) {
 		this.element.appendChild(this.elements.zoomout);
 	};
 
-	// TODO: buttons to incrementally zoom in, zoom out, move north, move south, move east, move west.
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
 
 	this.update = function() {};
 

@@ -24,6 +24,11 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 		this.parent.element.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.parent.element.removeChild(this.element);
+  };
+
 	this.update = function() {
 		// only resize if the zoom has changed
 		if (this.zoom !== this.config.position.zoom) this.resize();
@@ -34,7 +39,6 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 	};
 
 	this.show = function(input) {
-		console.log('indicator.show', input);
 		// handle the event if this was used as one
     if (input.target) input = input.target;
     // gather the parameters from diverse input

@@ -16,6 +16,11 @@ Localmap.prototype.Scale = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
+
 	this.update = function() {
 		// only redraw if the zoom has changed
 		if (this.zoom !== this.config.position.zoom) this.redraw();

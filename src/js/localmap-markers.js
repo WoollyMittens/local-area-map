@@ -26,7 +26,9 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		}
 	};
 
-	// TODO: use cached data or load the JSON file
+  this.stop = function() {
+    // TODO: remove the elements
+  };
 
 	this.update = function() {
 		// only resize if the zoom has changed
@@ -36,7 +38,6 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.resize = function() {
-		console.log('markers resize', this.config.position.zoom);
 		// resize the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
@@ -54,9 +55,14 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		min.lat = (guideData.assets) ? guideData.assets.bounds.north : guideData.bounds.north;
 		max.lon = (guideData.assets) ? guideData.assets.bounds.east : guideData.bounds.east;
 		max.lat = (guideData.assets) ? guideData.assets.bounds.south : guideData.bounds.south;
+    // store the coverage limits
+		min.lon_cover = guideData.bounds.west;
+		min.lat_cover = guideData.bounds.north;
+		max.lon_cover = guideData.bounds.east;
+		max.lat_cover = guideData.bounds.south;
 		// store the initial position
-		config.position.lon = (max.lon - min.lon) / 2;
-		config.position.lat = (max.lat - min.lat) / 2;
+		config.position.lon = (max.lon_cover - min.lon_cover) / 2;
+		config.position.lat = (max.lat_cover - min.lat_cover) / 2;
 		// position every marker in the guide
 		guideData.markers.map(this.addMarker.bind(this));
 	};

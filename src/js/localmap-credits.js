@@ -16,6 +16,11 @@ Localmap.prototype.Credits = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
+
 	this.update = function() {};
 
 	// EVENTS

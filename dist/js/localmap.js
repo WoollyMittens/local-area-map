@@ -28,11 +28,15 @@ var Localmap = function(config) {
 		'minimum': {
 			'lon': null,
 			'lat': null,
+			'lon_cover': null,
+			'lat_cover': null,
 			'zoom': null
 		},
 		'maximum': {
 			'lon': null,
 			'lat': null,
+			'lon_cover': null,
+			'lat_cover': null,
 			'zoom': null
 		},
 		'position': {
@@ -72,8 +76,8 @@ var Localmap = function(config) {
   this.focus = function(lon, lat, zoom, smoothly) {
     // try to keep the focus within bounds
     this.config.useTransitions = smoothly;
-    this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon), this.config.minimum.lon);
-    this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat), this.config.minimum.lat);
+    this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon_cover), this.config.minimum.lon_cover);
+    this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat_cover), this.config.minimum.lat_cover);
     this.config.position.zoom = Math.max(Math.min(zoom, this.config.maximum.zoom), this.config.minimum.zoom);
     this.update();
   };
@@ -81,11 +85,15 @@ var Localmap = function(config) {
   this.describe = function(markerdata) {
     // show a popup describing the markerdata
     this.components.modal.show(markerdata);
+    // resolve any callback
+    if (markerdata.callback) markerdata.callback(markerdata);
   };
 
   this.stop = function() {
-    // release the container
-    this.container.innerHTML = '';
+    // remove each component
+    for (var key in this.components)
+      if (this.components[key].stop)
+        this.components[key].stop(this.config);
   };
 
   this.indicate = function(input) {
@@ -110,10 +118,26 @@ var Localmap = function(config) {
 
   // EVENTS
 
+  this.onComplete = function() {
+    console.log('this.onComplete');
+    // remove the busy indicator
+    this.config.container.className = this.config.container.className.replace(/ localmap-busy/g, '');
+    // global update
+    this.update();
+  };
+
+  this.onResize = function() {
+    // TODO: update measurements after resize
+  };
+
+  window.addEventListener('resize', this.onResize.bind(this));
+
   // CLASSES
 
+  this.config.container.className += ' localmap-busy';
+
   this.components = {
-    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this), this.focus.bind(this)),
+    canvas: new this.Canvas(this, this.onComplete.bind(this), this.describe.bind(this), this.focus.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this),
@@ -146,6 +170,11 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.element.setAttribute('src', this.config.mapUrl);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.parent.element.removeChild(this.element);
+  };
+
 	this.update = function() {};
 
 	this.redraw = function() {
@@ -157,8 +186,8 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var centerX = (container.offsetWidth - element.naturalWidth * min.zoom) / 2;
 		var centerY = (container.offsetHeight - element.naturalHeight * min.zoom) / 2;
 		// store the initial position
-		this.config.position.lon = (min.lon + max.lon) / 2;
-		this.config.position.lat = (min.lat + max.lat) / 2;
+    this.config.position.lon = (min.lon_cover + max.lon_cover) / 2;
+		this.config.position.lat = (min.lat_cover + max.lat_cover) / 2;
 		this.config.position.zoom = min.zoom;
 		// position the canvas
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
@@ -174,7 +203,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var max = this.config.maximum;
 		// extract the interpolation limits
 		min.zoom = Math.max(container.offsetWidth / this.element.naturalWidth, container.offsetHeight / this.element.naturalHeight);
-		max.zoom = 1.5;
+		max.zoom = 1;
 		// center the background
 		this.redraw();
 		// resolve the promise
@@ -204,6 +233,15 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		// add the canvas to the parent container
 		this.config.container.appendChild(this.element);
 	};
+
+  this.stop = function() {
+    // remove each sub-component
+    for (var key in this.components)
+      if (this.components[key].stop)
+        this.components[key].stop(this.config);
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
 
 	this.update = function() {
 		// redraw this component
@@ -289,7 +327,10 @@ Localmap.prototype.Controls = function (parent) {
 		this.element.appendChild(this.elements.zoomout);
 	};
 
-	// TODO: buttons to incrementally zoom in, zoom out, move north, move south, move east, move west.
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
 
 	this.update = function() {};
 
@@ -413,6 +454,11 @@ Localmap.prototype.Credits = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
+
 	this.update = function() {};
 
 	// EVENTS
@@ -447,6 +493,11 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 		this.parent.element.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.parent.element.removeChild(this.element);
+  };
+
 	this.update = function() {
 		// only resize if the zoom has changed
 		if (this.zoom !== this.config.position.zoom) this.resize();
@@ -457,7 +508,6 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 	};
 
 	this.show = function(input) {
-		console.log('indicator.show', input);
 		// handle the event if this was used as one
     if (input.target) input = input.target;
     // gather the parameters from diverse input
@@ -591,6 +641,11 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
 
 	this.start = function() {};
 
+  this.stop = function() {
+    // remove the element
+    if (this.config.legend) this.config.legend.innerHTML = '';
+  };
+
 	this.update = function() {
     // write the legend if needed and available
     if (this.config.legend && this.elements.length === 0) this.elements = this.config.guideData.markers.map(this.addDefinition.bind(this));
@@ -603,7 +658,7 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
       // format the path to the external assets
       var guideData = this.config.guideData;
       var key = (guideData.assets) ? guideData.assets.prefix : guideData.gps;
-      var image = (markerData.photo) ? this.config.assetsUrl + '/' + key + '/' + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
+      var image = (markerData.photo) ? this.config.assetsUrl + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
       var text = markerData.description || markerData.type;
       // create a container for the elements
       var fragment = document.createDocumentFragment();
@@ -667,6 +722,11 @@ Localmap.prototype.Location = function (parent) {
 			this.requestPosition();
 		}
 	};
+
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.permissions);
+  };
 
 	this.update = function() {
 		// only resize if the zoom has changed
@@ -747,7 +807,9 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		}
 	};
 
-	// TODO: use cached data or load the JSON file
+  this.stop = function() {
+    // TODO: remove the elements
+  };
 
 	this.update = function() {
 		// only resize if the zoom has changed
@@ -757,7 +819,6 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	};
 
 	this.resize = function() {
-		console.log('markers resize', this.config.position.zoom);
 		// resize the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
@@ -771,13 +832,18 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		// store the interpolation limits
 		var min = this.config.minimum;
 		var max = this.config.maximum;
-		min.lon = (this.config.bounds) ? this.config.bounds.west : guideData.bounds.west;
-		min.lat = (this.config.bounds) ? this.config.bounds.north : guideData.bounds.north;
-		max.lon = (this.config.bounds) ? this.config.bounds.east : guideData.bounds.east;
-		max.lat = (this.config.bounds) ? this.config.bounds.south : guideData.bounds.south;
+		min.lon = (guideData.assets) ? guideData.assets.bounds.west : guideData.bounds.west;
+		min.lat = (guideData.assets) ? guideData.assets.bounds.north : guideData.bounds.north;
+		max.lon = (guideData.assets) ? guideData.assets.bounds.east : guideData.bounds.east;
+		max.lat = (guideData.assets) ? guideData.assets.bounds.south : guideData.bounds.south;
+    // store the coverage limits
+		min.lon_cover = guideData.bounds.west;
+		min.lat_cover = guideData.bounds.north;
+		max.lon_cover = guideData.bounds.east;
+		max.lat_cover = guideData.bounds.south;
 		// store the initial position
-		config.position.lon = (config.maximum.lon - config.minimum.lon) / 2;
-		config.position.lat = (config.maximum.lat - config.minimum.lat) / 2;
+		config.position.lon = (max.lon_cover - min.lon_cover) / 2;
+		config.position.lat = (max.lat_cover - min.lat_cover) / 2;
 		// position every marker in the guide
 		guideData.markers.map(this.addMarker.bind(this));
 	};
@@ -861,16 +927,23 @@ Localmap.prototype.Modal = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
+
 	this.update = function() {};
 
 	this.show = function(markerData) {
 
-// TODO: if there is no photo use the icon but as an aside
+    // TODO: if there is no photo use the icon but as an aside
+
+    // TODO: if the medium res photo won't load, defer to the thumbnail
 
 		// display the photo if available
 		if (markerData.photo) {
 			this.photo.style.display = null;
-			this.photo.style.backgroundImage = 'url(' + this.config.assetsUrl + 'medium/' + this.config.guideData.gps + '/' + markerData.photo + ')';
+			this.photo.style.backgroundImage = 'url(' + this.config.assetsUrl + markerData.photo + ')';
 		} else {
 			this.photo.style.display = 'none';
 		}
@@ -927,6 +1000,11 @@ Localmap.prototype.Route = function (parent) {
 		this.parent.element.appendChild(this.canvas);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.parent.element.removeChild(this.canvas);
+  };
+
 	this.update = function() {
 		// only redraw if the zoom has changed
 		if (this.zoom !== this.config.position.zoom) this.redraw();
@@ -941,17 +1019,23 @@ Localmap.prototype.Route = function (parent) {
 		// position every trackpoint in the route
 		var ctx = this.canvas.getContext('2d');
 		// (re)draw the route
-		var x, y, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
+		var x0, y0, x1, y1, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
 		ctx.clearRect(0, 0, w, h);
 		ctx.lineWidth = 4 / z;
 		ctx.strokeStyle = 'orange';
 		ctx.beginPath();
 		for (var key in this.coordinates) {
 			if (this.coordinates.hasOwnProperty(key) && key % 1 == 0) {
-				if (x = null) ctx.moveTo(x, y);
-				x = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
-				y = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
-				ctx.lineTo(x, y);
+        // calculate the current step
+				x1 = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
+				y1 = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+        // if the step seems valid, draw the step
+  			if ((Math.abs(x1 - x0) + Math.abs(y1 - y0)) < 50) { ctx.lineTo(x1, y1); }
+        // or jump unlikely/erroneous steps
+        else { ctx.moveTo(x1, y1); }
+        // store current step as the previous step
+        x0 = x1;
+        y0 = y1;
 			}
 		}
 		ctx.stroke();
@@ -1005,6 +1089,11 @@ Localmap.prototype.Scale = function (parent) {
 		this.element.setAttribute('class', 'localmap-scale');
 		this.config.container.appendChild(this.element);
 	};
+
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
 
 	this.update = function() {
 		// only redraw if the zoom has changed

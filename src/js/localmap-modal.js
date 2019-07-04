@@ -31,20 +31,25 @@ Localmap.prototype.Modal = function (parent) {
 		this.config.container.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
+
 	this.update = function() {};
 
 	this.show = function(markerData) {
 		// display the photo if available
 		if (markerData.photo) {
-			this.photo.style.display = null;
-			this.photo.style.backgroundImage = 'url(' + this.config.assetsUrl + markerData.photo + ')';
+			this.photo.style.backgroundImage = 'url(' + this.config.photosUrl + markerData.photo + '), url(' + this.config.thumbsUrl + markerData.photo + ')';
+      this.photo.className = 'localmap-modal-photo';
 		} else {
-			this.photo.style.display = 'none';
+			this.photo.style.backgroundImage = 'url(' + this.config.markersUrl.replace('{type}', markerData.type) + ')';
+      this.photo.className = 'localmap-modal-icon';
 		}
 		// display the content if available
 		if (markerData.description) {
-			this.description.innerHTML = (markerData.photo) ? '' : '<img class="localmap-modal-icon" src="' + this.config.markersUrl.replace('{type}', markerData.type) + '" alt=""/>';
-			this.description.innerHTML += '<p>' + markerData.description + '</p>';
+			this.description.innerHTML = '<p>' + markerData.description + '</p>';
 		} else {
 			return false;
 		}

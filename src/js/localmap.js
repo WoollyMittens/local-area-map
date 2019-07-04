@@ -14,7 +14,8 @@ var Localmap = function(config) {
   this.config = {
     'container': null,
     'canvasElement': null,
-    'assetsUrl': null,
+    'thumbsUrl': null,
+    'photosUrl': null,
     'markersUrl': null,
     'guideUrl': null,
     'routeUrl': null,
@@ -28,11 +29,15 @@ var Localmap = function(config) {
 		'minimum': {
 			'lon': null,
 			'lat': null,
+			'lon_cover': null,
+			'lat_cover': null,
 			'zoom': null
 		},
 		'maximum': {
 			'lon': null,
 			'lat': null,
+			'lon_cover': null,
+			'lat_cover': null,
 			'zoom': null
 		},
 		'position': {
@@ -72,8 +77,8 @@ var Localmap = function(config) {
   this.focus = function(lon, lat, zoom, smoothly) {
     // try to keep the focus within bounds
     this.config.useTransitions = smoothly;
-    this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon), this.config.minimum.lon);
-    this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat), this.config.minimum.lat);
+    this.config.position.lon = Math.max(Math.min(lon, this.config.maximum.lon_cover), this.config.minimum.lon_cover);
+    this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat_cover), this.config.minimum.lat_cover);
     this.config.position.zoom = Math.max(Math.min(zoom, this.config.maximum.zoom), this.config.minimum.zoom);
     this.update();
   };
@@ -81,11 +86,15 @@ var Localmap = function(config) {
   this.describe = function(markerdata) {
     // show a popup describing the markerdata
     this.components.modal.show(markerdata);
+    // resolve any callback
+    if (markerdata.callback) markerdata.callback(markerdata);
   };
 
   this.stop = function() {
-    // release the container
-    this.container.innerHTML = '';
+    // remove each component
+    for (var key in this.components)
+      if (this.components[key].stop)
+        this.components[key].stop(this.config);
   };
 
   this.indicate = function(input) {
@@ -110,10 +119,25 @@ var Localmap = function(config) {
 
   // EVENTS
 
+  this.onComplete = function() {
+    // remove the busy indicator
+    this.config.container.className = this.config.container.className.replace(/ localmap-busy/g, '');
+    // global update
+    this.update();
+  };
+
+  this.onResize = function() {
+    // TODO: update measurements after resize
+  };
+
+  window.addEventListener('resize', this.onResize.bind(this));
+
   // CLASSES
 
+  this.config.container.className += ' localmap-busy';
+
   this.components = {
-    canvas: new this.Canvas(this, this.update.bind(this), this.describe.bind(this), this.focus.bind(this)),
+    canvas: new this.Canvas(this, this.onComplete.bind(this), this.describe.bind(this), this.focus.bind(this)),
     controls: new this.Controls(this),
     scale: new this.Scale(this),
     credits: new this.Credits(this),

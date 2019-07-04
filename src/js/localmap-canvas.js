@@ -18,6 +18,15 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		this.config.container.appendChild(this.element);
 	};
 
+  this.stop = function() {
+    // remove each sub-component
+    for (var key in this.components)
+      if (this.components[key].stop)
+        this.components[key].stop(this.config);
+    // remove the element
+    this.config.container.removeChild(this.element);
+  };
+
 	this.update = function() {
 		// redraw this component
 		this.redraw();

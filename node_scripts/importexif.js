@@ -11,12 +11,13 @@ var generateQueue = function () {
 	// get the folder list
 	var queue = [], images = [], srcPath, dstPath,
 		folders = fs.readdirSync(source),
-		isInvisible = new RegExp('^[.]|.json$|.gpx$|.png$'),
+		isInvisible = new RegExp('^[.]'),
+		isFile = new RegExp('.gpx$|.json$|.png$'),
 		isPhoto = new RegExp('.jpg$', 'i');
 	// for every folder
 	for (var a = 0, b = folders.length; a < b; a += 1) {
 		// if this isn't a bogus folder
-		if (!isInvisible.test(folders[a])) {
+		if (!isInvisible.test(folders[a]) && !isFile.test(folders[a])) {
 			// get the folder contents
 			images = fs.readdirSync(source + folders[a]);
 			// for every image in the folder
@@ -40,7 +41,7 @@ var parseImages = function (queue) {
 	// if the queue is not empty
 	if (queue.length > 0) {
 		// pick an item from the queue
-		var item = queue[queue.length - 1];
+		var item = queue.pop();
 		// process the item in the queue
 		new ex.ExifImage({ image : source + item.folder + '/' + item.image }, function (error, exifData) {
 			if (error) {
@@ -64,8 +65,6 @@ var parseImages = function (queue) {
 				exifs[item.folder][item.image.toLowerCase()] = { 'lon' : lon, 'lat' : lat };
 				// report what was done
 				console.log('indexed:', source + item.folder + '/' + item.image);
-				// remove the item from the queue
-				queue.length = queue.length - 1;
 				// next iteration in the queue
 				parseImages(queue);
 			}

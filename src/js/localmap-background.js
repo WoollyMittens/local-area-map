@@ -17,6 +17,11 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.element.setAttribute('src', this.config.mapUrl);
 	};
 
+  this.stop = function() {
+    // remove the element
+    this.parent.element.removeChild(this.element);
+  };
+
 	this.update = function() {};
 
 	this.redraw = function() {
@@ -28,8 +33,8 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var centerX = (container.offsetWidth - element.naturalWidth * min.zoom) / 2;
 		var centerY = (container.offsetHeight - element.naturalHeight * min.zoom) / 2;
 		// store the initial position
-		this.config.position.lon = (min.lon + max.lon) / 2;
-		this.config.position.lat = (min.lat + max.lat) / 2;
+    this.config.position.lon = (min.lon_cover + max.lon_cover) / 2;
+		this.config.position.lat = (min.lat_cover + max.lat_cover) / 2;
 		this.config.position.zoom = min.zoom;
 		// position the canvas
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
@@ -45,7 +50,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var max = this.config.maximum;
 		// extract the interpolation limits
 		min.zoom = Math.max(container.offsetWidth / this.element.naturalWidth, container.offsetHeight / this.element.naturalHeight);
-		max.zoom = 1.5;
+		max.zoom = 1;
 		// center the background
 		this.redraw();
 		// resolve the promise

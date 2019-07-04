@@ -15,9 +15,11 @@ The stylesheet is best included in the header of the document.
 This include can be added to the header or placed inline before the script is invoked.
 
 ```html
+<!-- optional: --->
 <script src="data/guide-data.js"></script>
 <script src="data/exif-data.js"></script>
 <script src="data/gpx-data.js"></script>
+<!-- required: -->
 <script src="js/localmap.js"></script>
 ```
 
@@ -25,7 +27,9 @@ Or use [Require.js](https://requirejs.org/).
 
 ```js
 requirejs([
+	// required:
 	"js/localmap.js",
+	// optional:
 	"data/guide-data.js",
 	"data/exif-data.js",
 	"data/gpx-data.js"
@@ -37,9 +41,11 @@ requirejs([
 Or import into an MVC framework.
 
 ```js
+// optional:
 var GuideData = require('data/guide-data.js');
 var GpxData = require('data/gpx-data.js');
 var ExifData = require('data/exif-data.js');
+// required:
 var Localmap = require('js/localmap.js');
 ```
 
@@ -49,7 +55,8 @@ var Localmap = require('js/localmap.js');
 var localmap = new Localmap({
 	'container': document.querySelector('.localmap'),
 	'legend': document.querySelector('.localmap-legend'),
-	'assetsUrl': '//www.sydneytrainwalks.com/inc/',
+	'thumbsUrl': './inc/',
+	'photosUrl': '//www.sydneytrainwalks.com/inc/',
 	'markersUrl': 'img/marker-{type}.svg',
 	'mapUrl': 'data/adamstown-awabakal-adamstown.png',
 	'guideUrl': 'data/adamstown-awabakal-adamstown.json',
@@ -66,7 +73,9 @@ var localmap = new Localmap({
 
 **legend : {DOM node}** - Optional HTML DOM element that will contain the legend.
 
-**assetsUrl : {String}** - Template for the path to the photo assets.
+**thumbsUrl : {String}** - Template for the path to the thumbnail assets.
+
+**photosUrl : {String}** - Template for the path to the photo assets.
 
 **markersUrl : {String}** - Template for the path to the marker images.
 
@@ -78,11 +87,11 @@ var localmap = new Localmap({
 
 **exifUrl : {String}** - Path a webservice that extracts geolocation data from photos.
 
-**guideData : {String}** - A local cache JSON guides.
+**guideData : {String}** - An optional cache of guides.
 
-**routeData : {String}** - A local cache of GPX routes.
+**routeData : {String}** - An optional cache of GPS routes.
 
-**exifData : {String}** - A local cache of geolocation data from photos.
+**exifData : {String}** - An optional cache of geolocation data.
 
 **creditsTemplate : {String}** - Template for the map's copyright notice.
 
@@ -91,7 +100,7 @@ var localmap = new Localmap({
 ### Indicate
 
 ```javascript
-photomap.indicate(element);
+localmap.indicate(element);
 ```
 
 Highlights and centres a specific location.
@@ -101,10 +110,18 @@ Highlights and centres a specific location.
 ### Unindicate
 
 ```javascript
-photomap.unindicate(element);
+localmap.unindicate(element);
 ```
 
 Reset the map after "indicate" was used.
+
+### Stop
+
+```javascript
+localmap.stop();
+```
+
+End the script gracefully, for re-use of the container.
 
 ## How to build the script
 
