@@ -16,9 +16,9 @@ This include can be added to the header or placed inline before the script is in
 
 ```html
 <!-- optional: --->
-<script src="data/guide-data.js"></script>
-<script src="data/exif-data.js"></script>
-<script src="data/gpx-data.js"></script>
+<script src="cache/guide-data.js"></script>
+<script src="cache/exif-data.js"></script>
+<script src="cache/gpx-data.js"></script>
 <!-- required: -->
 <script src="js/localmap.js"></script>
 ```
@@ -30,9 +30,9 @@ requirejs([
 	// required:
 	"js/localmap.js",
 	// optional:
-	"data/guide-data.js",
-	"data/exif-data.js",
-	"data/gpx-data.js"
+	"cache/guide-data.js",
+	"cache/exif-data.js",
+	"cache/gpx-data.js"
 ], function(Localmap, GuideData, ExifData, GpxData) {
 	...
 });
@@ -42,9 +42,9 @@ Or import into an MVC framework.
 
 ```js
 // optional:
-var GuideData = require('data/guide-data.js');
-var GpxData = require('data/gpx-data.js');
-var ExifData = require('data/exif-data.js');
+var GuideData = require('cache/guide-data.js');
+var GpxData = require('cache/gpx-data.js');
+var ExifData = require('cache/exif-data.js');
 // required:
 var Localmap = require('js/localmap.js');
 ```
@@ -138,9 +138,9 @@ The following commands are available for development:
 + `gulp serve` - Serves the project on a temporary web server at http://localhost:8500/.
 + `gulp php` - Serves the project on a temporary php server at http://localhost:8500/.
 + `cd node_scripts`
-	+ `node importexif` - Prepare a cache of GPS data of all the photos.
-	+ `node importgpx` - Prepare a cache of GPS data of all routes.
-	+ `node importguides` - Prepare a cache of JSON data for all the guides.
+	+ `node importexif` - Prepares a cache of GPS data of all the photos.
+	+ `node importgpx` - Prepares a cache of GPS data of all routes.
+	+ `node importguides` - Prepares a cache of JSON data for all the guides.
 	+ `node importmaps` - Downloads the required map tiles from an OpenStreetMap server".
 
 ## License
