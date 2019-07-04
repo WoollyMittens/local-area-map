@@ -12,6 +12,10 @@ Localmap.prototype.Route = function (parent) {
 	// METHODS
 
 	this.start = function() {
+		// create a canvas
+		this.canvas = document.createElement('canvas');
+		this.canvas.setAttribute('class', 'localmap-route')
+		this.parent.element.appendChild(this.canvas);
 		// use the JSON immediately
 		if (this.config.routeData) {
 			this.onJsonLoaded(this.config.routeData);
@@ -22,10 +26,6 @@ Localmap.prototype.Route = function (parent) {
 			routeXhr.open('GET', this.config.routeUrl, true);
 			routeXhr.send();
 		}
-		// create a canvas
-		this.canvas = document.createElement('canvas');
-		this.canvas.setAttribute('class', 'localmap-route')
-		this.parent.element.appendChild(this.canvas);
 	};
 
   this.stop = function() {
@@ -83,6 +83,8 @@ Localmap.prototype.Route = function (parent) {
 			segments.push(coordinates);
 		}
 		this.coordinates = [].concat.apply([], segments);
+    // redraw
+    this.redraw();
 	};
 
 	this.onGpxLoaded = function(evt) {
@@ -94,6 +96,8 @@ Localmap.prototype.Route = function (parent) {
 				this.coordinates.push([parseFloat(trackpoints[key].getAttribute('lon')), parseFloat(trackpoints[key].getAttribute('lat')), null]);
 			}
 		}
+    // redraw
+    this.redraw();
 	};
 
 	this.start();

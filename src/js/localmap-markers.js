@@ -80,7 +80,6 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = document.createElement('span');
 		element.setAttribute('class', 'localmap-waypoint');
-		element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
 		element.style.cursor = 'pointer';
@@ -92,11 +91,11 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = new Image();
 		element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
-		element.setAttribute('alt', '');
+		element.setAttribute('title', markerData.description || '');
 		element.setAttribute('class', 'localmap-marker');
 		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
 		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
-		element.style.cursor = (markerData.description) ? 'pointer' : null;
+		element.style.cursor = (markerData.description || markerData.callback) ? 'pointer' : null;
 		return element;
 	};
 
