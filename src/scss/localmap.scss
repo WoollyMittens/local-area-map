@@ -1,4 +1,21 @@
 @import "mixins";
-@import "interface";
-@import "legend";
-@import "example";
+
+.localmap {
+  display: block;
+  height: 400px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  border: solid 1px #000;
+  @include border-box;
+
+  @import "canvas";
+  @import "common";
+  @import "controls";
+  @import "example";
+  @import "legend";
+  @import "markers";
+  @import "modal";
+}

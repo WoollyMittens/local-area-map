@@ -1,11 +1,10 @@
-$color-background : #ffffff;
-$color-text : #1e1e1e;
-$color-passive : #ff6a00;
-$color-active : #d45800;
-$color-hover : #ff9800;
-$color-disabled : #7f7f7f;
-$color-highlight : #eeeeee;
-
+$color-background: #ffffff;
+$color-text: #1e1e1e;
+$color-passive: #ff6a00;
+$color-active: #d45800;
+$color-hover: #ff9800;
+$color-disabled: #7f7f7f;
+$color-highlight: #eeeeee;
 @mixin clearfix () {
 	&:after {
 		clear: both;
@@ -13,7 +12,6 @@ $color-highlight : #eeeeee;
 		display: table;
 	}
 }
-
 @mixin border-box {
 	box-sizing: border-box;
 
@@ -23,7 +21,6 @@ $color-highlight : #eeeeee;
 		box-sizing: border-box;
 	}
 }
-
 @mixin time-estimate {
 	display: inline-block;
 	background-color: #1B5E20;

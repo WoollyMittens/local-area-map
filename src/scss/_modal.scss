@@ -1,0 +1,62 @@
+&-modal {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 70%;
+  background-color: #fff;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+  z-index: 9;
+  transform: translate(-125%, 0);
+  transition: transform ease 500ms;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  &-icon {
+    display: block;
+    width: 25%;
+    height: auto;
+    margin: 0 auto 1em;
+  }
+
+  &-icon,
+  &-photo {
+    flex: 0;
+    margin: 0;
+    min-height: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #eee;
+  }
+
+  &-icon {
+    min-height: 25%;
+    background-size: auto 75%;
+  }
+
+  &-content {
+    flex: 1;
+    padding: 1rem 2rem;
+    overflow: auto;
+    width: 100%;
+    position: relative;
+
+    i {
+      @include time-estimate;
+    }
+  }
+
+  &-visible {
+    transform: translate(0, 0);
+  }
+
+  &-closer {
+    background-image: url("../img/icon-close.svg");
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}

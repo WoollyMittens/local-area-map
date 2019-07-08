@@ -1,0 +1,40 @@
+&-controls {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 8;
+
+  button {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  &-zoomin {
+    background-image: url("../img/icon-zoomin.svg");
+  }
+
+  &-zoomout {
+    background-image: url("../img/icon-zoomout.svg");
+  }
+}
+
+&-return {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 9;
+  background-image: url("../img/icon-east.svg");
+}
+
+&-permissions {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 9;
+
+  button {
+    background-image: url("../img/icon-location.svg");
+    background-size: 70% auto;
+  }
+}

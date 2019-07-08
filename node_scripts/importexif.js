@@ -1,7 +1,7 @@
 // constants
 var ex = require('exif');
 var fs = require('fs');
-var source = '../src/data/';
+var source = '../src/photos/';
 var destPath = '../src/cache/exif-data.js';
 var jsonPath = '../src/cache/photos.json';
 var exifs = {};

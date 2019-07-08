@@ -28,7 +28,7 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
     if (markerData.description) {
       // format the path to the external assets
       var guideData = this.config.guideData;
-      var key = (guideData.assets) ? guideData.assets.prefix : guideData.gps;
+      var key = (guideData.alias) ? guideData.alias.prefix : guideData.gps;
       var image = (markerData.photo) ? this.config.thumbsUrl + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
       var text = markerData.description || markerData.type;
       // create a container for the elements
