@@ -8,6 +8,9 @@ Localmap.prototype.Location = function (parent) {
 	this.element = new Image();
 	this.zoom = null;
 	this.active = false;
+	this.options = {
+		enableHighAccuracy: true
+	};
 
 	// METHODS
 
@@ -52,7 +55,11 @@ Localmap.prototype.Location = function (parent) {
 	this.requestPosition = function() {
 		if (!this.active) {
 			// request location updates
-			this.locator = navigator.geolocation.watchPosition(this.onReposition.bind(this));
+			this.locator = navigator.geolocation.watchPosition(
+				this.onReposition.bind(this),
+				this.onPositionFailed.bind(this),
+				this.options
+			);
 			// create the indicator
 			this.element.setAttribute('src', this.config.markersUrl.replace('{type}', 'location'));
 			this.element.setAttribute('alt', '');
@@ -81,6 +88,10 @@ Localmap.prototype.Location = function (parent) {
 			// hide the marker
 			this.element.style.display = 'none';
 		}
+	};
+
+	this.onPositionFailed = function(error) {
+		console.log('requestPosition:', error);
 	};
 
 	this.start();

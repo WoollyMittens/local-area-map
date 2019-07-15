@@ -29,9 +29,11 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var element = this.element;
 		var min = this.config.minimum;
 		var max = this.config.maximum;
+		var displayWidth = this.element.naturalWidth / 2;
+		var displayHeight = this.element.naturalHeight / 2;
 		// calculate the center
-		var centerX = (container.offsetWidth - element.naturalWidth * min.zoom) / 2;
-		var centerY = (container.offsetHeight - element.naturalHeight * min.zoom) / 2;
+		var centerX = (container.offsetWidth - displayWidth * min.zoom) / 2;
+		var centerY = (container.offsetHeight - displayHeight * min.zoom) / 2;
 		// store the initial position
     this.config.position.lon = (min.lon_cover + max.lon_cover) / 2;
 		this.config.position.lat = (min.lat_cover + max.lat_cover) / 2;
@@ -48,9 +50,13 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var container = this.config.container;
 		var min = this.config.minimum;
 		var max = this.config.maximum;
+		var displayWidth = this.element.naturalWidth / 2;
+		var displayHeight = this.element.naturalHeight / 2;
+		this.element.style.width = displayWidth + 'px';
+		this.element.style.height = displayHeight + 'px';
 		// extract the interpolation limits
-		min.zoom = Math.max(container.offsetWidth / this.element.naturalWidth, container.offsetHeight / this.element.naturalHeight);
-		max.zoom = 1;
+		min.zoom = Math.max(container.offsetWidth / displayWidth, container.offsetHeight / displayHeight);
+		max.zoom = 2;
 		// center the background
 		this.redraw();
 		// resolve the promise

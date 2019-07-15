@@ -29,9 +29,9 @@
 
 &-permissions {
   position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 9;
+  right: 10px;
+  top: 10px;
+  z-index: 10;
 
   button {
     background-image: url("../img/icon-location.svg");
