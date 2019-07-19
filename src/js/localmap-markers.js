@@ -8,6 +8,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 	this.elements = [];
 	this.onMarkerClicked = onMarkerClicked;
 	this.zoom = null;
+	this.delay = null;
 
 	// METHODS
 
@@ -31,14 +32,17 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
   };
 
 	this.update = function() {
-		// only resize if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) this.resize();
+		// defer redraw until idle
+		if (this.config.position.zoom !== this.zoom) {
+			clearTimeout(this.delay);
+			this.delay = setTimeout(this.redraw.bind(this), 10);
+		}
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
 	};
 
-	this.resize = function() {
-		// resize the markers according to scale
+	this.redraw = function() {
+		// redraw the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
 			this.elements[key].style.transform = 'scale(' + scale + ')'

@@ -9,7 +9,8 @@ Localmap.prototype.Controls = function (parent) {
 	this.inertia = {x:0, y:0, z:0};
 	this.elements = {};
 	this.range = {};
-	this.steps = {x:0, y:0, z:0.02};
+	this.steps = {x:0, y:0, z:0.05};
+	this.zoom = null;
 
 	// METHODS
 
@@ -37,7 +38,16 @@ Localmap.prototype.Controls = function (parent) {
     this.config.container.removeChild(this.element);
   };
 
-	this.update = function() {};
+	this.update = function() {
+		// only redraw if the zoom has changed
+		if (this.zoom !== this.config.position.zoom) {
+			// check if the buttons are at their limits
+			this.elements.zoomin.disabled = (this.config.position.zoom === this.config.maximum.zoom);
+			this.elements.zoomout.disabled = (this.config.position.zoom === this.config.minimum.zoom);
+		}
+		// store the current zoom level
+		this.zoom = this.config.position.zoom;
+	};
 
 	this.reposition = function(hasInertia) {
 		// cancel any pending timeout
@@ -119,6 +129,10 @@ Localmap.prototype.Controls = function (parent) {
 
 	this.wheelInteraction = function(evt) {
 		evt.preventDefault();
+		// update the range
+		this.range.lon = this.config.maximum.lon - this.config.minimum.lon;
+		this.range.lat = this.config.maximum.lat - this.config.minimum.lat;
+		this.range.zoom = this.config.maximum.zoom - this.config.minimum.zoom;
 		// update the inertia
 		this.inertia.z += (evt.deltaY > 0) ? this.steps.z : -this.steps.z;
 		// movement with inertia

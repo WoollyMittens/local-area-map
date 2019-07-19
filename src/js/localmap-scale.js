@@ -7,6 +7,7 @@ Localmap.prototype.Scale = function (parent) {
 	this.config = parent.config;
 	this.element = document.createElement('div');
 	this.zoom = null;
+	this.delay = null;
 
 	// METHODS
 
@@ -22,8 +23,11 @@ Localmap.prototype.Scale = function (parent) {
   };
 
 	this.update = function() {
-		// only redraw if the zoom has changed
-		if (this.zoom !== this.config.position.zoom) this.redraw();
+		// defer redraw until idle
+		if (this.config.position.zoom !== this.zoom) {
+			clearTimeout(this.delay);
+			this.delay = setTimeout(this.redraw.bind(this), 10);
+		}
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;
 	};

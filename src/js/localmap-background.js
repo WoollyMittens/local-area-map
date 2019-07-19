@@ -37,7 +37,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		// store the initial position
     this.config.position.lon = (min.lon_cover + max.lon_cover) / 2;
 		this.config.position.lat = (min.lat_cover + max.lat_cover) / 2;
-		this.config.position.zoom = min.zoom;
+		this.config.position.zoom = min.zoom * 1.1;
 		// position the canvas
 		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
 		// insert the image into the canvas
