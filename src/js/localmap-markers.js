@@ -35,7 +35,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		// defer redraw until idle
 		if (this.config.position.zoom !== this.zoom) {
 			clearTimeout(this.delay);
-			this.delay = setTimeout(this.redraw.bind(this), 10);
+			this.delay = setTimeout(this.redraw.bind(this), 100);
 		}
 		// store the current zoom level
 		this.zoom = this.config.position.zoom;

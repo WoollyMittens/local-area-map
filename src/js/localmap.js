@@ -126,12 +126,6 @@ var Localmap = function(config) {
     this.update();
   };
 
-  this.onResize = function() {
-    // TODO: update measurements after resize
-  };
-
-  window.addEventListener('resize', this.onResize.bind(this));
-
   // CLASSES
 
   this.config.container.className += ' localmap-busy';

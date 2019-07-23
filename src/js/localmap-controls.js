@@ -9,7 +9,7 @@ Localmap.prototype.Controls = function (parent) {
 	this.inertia = {x:0, y:0, z:0};
 	this.elements = {};
 	this.range = {};
-	this.steps = {x:0.003, y:0.003, z:0.03};
+	this.steps = {x:0.03, y:0.03, z:0.05};
 	this.zoom = null;
 	this.last = null;
 
@@ -65,7 +65,7 @@ Localmap.prototype.Controls = function (parent) {
 			// attenuate the inertia
 			this.inertia.x *= 0.9;
 			this.inertia.y *= 0.9;
-			this.inertia.z *= 0.5;
+			this.inertia.z = 0;
 			// continue monitoring
 			this.animationFrame = window.requestAnimationFrame(this.reposition.bind(this, hasInertia));
 		}
@@ -152,7 +152,6 @@ Localmap.prototype.Controls = function (parent) {
 	this.dblclickInteraction = function(evt) {
 		// if the previous tap was short enough ago
 		if (new Date() - this.last < 250) {
-			console.log('double click', new Date() - this.last);
 			// zoom in on the map
 			this.parent.focus(
 				this.config.position.lon,

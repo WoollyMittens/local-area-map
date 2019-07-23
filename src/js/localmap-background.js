@@ -15,6 +15,8 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.element.addEventListener('load', this.onBackgroundLoaded.bind(this));
 		this.element.setAttribute('class', 'localmap-background');
 		this.element.setAttribute('src', this.config.mapUrl);
+		// catch window resizes
+		window.addEventListener('resize', this.redraw.bind(this));
 	};
 
   this.stop = function() {
@@ -31,6 +33,9 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var max = this.config.maximum;
 		var displayWidth = this.element.naturalWidth / 2;
 		var displayHeight = this.element.naturalHeight / 2;
+		// calculate the limits
+		min.zoom = Math.max(container.offsetWidth / displayWidth, container.offsetHeight / displayHeight);
+		max.zoom = 2;
 		// calculate the center
 		var centerX = (container.offsetWidth - displayWidth * min.zoom) / 2;
 		var centerY = (container.offsetHeight - displayHeight * min.zoom) / 2;
@@ -47,16 +52,9 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	// EVENTS
 
 	this.onBackgroundLoaded = function(evt) {
-		var container = this.config.container;
-		var min = this.config.minimum;
-		var max = this.config.maximum;
-		var displayWidth = this.element.naturalWidth / 2;
-		var displayHeight = this.element.naturalHeight / 2;
-		this.element.style.width = displayWidth + 'px';
-		this.element.style.height = displayHeight + 'px';
-		// extract the interpolation limits
-		min.zoom = Math.max(container.offsetWidth / displayWidth, container.offsetHeight / displayHeight);
-		max.zoom = 2;
+		// double up the bitmap to retina size
+		this.element.style.width = (this.element.naturalWidth / 2) + 'px';
+		this.element.style.height = (this.element.naturalHeight / 2) + 'px';
 		// center the background
 		this.redraw();
 		// resolve the promise
