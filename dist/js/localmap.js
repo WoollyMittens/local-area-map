@@ -1088,7 +1088,7 @@ Localmap.prototype.Route = function (parent) {
 				x1 = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
 				y1 = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
         // if the step seems valid, draw the step
-  			if ((Math.abs(x1 - x0) + Math.abs(y1 - y0)) < 50) { ctx.lineTo(x1, y1); }
+  			if ((Math.abs(x1 - x0) + Math.abs(y1 - y0)) < 30) { ctx.lineTo(x1, y1); }
         // or jump unlikely/erroneous steps
         else { ctx.moveTo(x1, y1); }
         // store current step as the previous step
