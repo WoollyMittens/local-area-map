@@ -12,6 +12,8 @@ var Localmap = function(config) {
   // PROPERTIES
 
   this.config = {
+    'key': null,
+    'alias': null,
     'container': null,
     'canvasElement': null,
     'thumbsUrl': null,
@@ -123,7 +125,14 @@ var Localmap = function(config) {
     // remove the busy indicator
     this.config.container.className = this.config.container.className.replace(/ localmap-busy/g, '');
     // global update
-    this.update();
+    var max = this.config.maximum;
+    var min = this.config.minimum;
+    this.focus(
+      (max.lon - min.lon) / 2 + min.lon,
+      (max.lat - min.lat) / 2 + min.lat,
+      1.1,
+      false
+    );
   };
 
   // CLASSES

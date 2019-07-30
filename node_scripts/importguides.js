@@ -1,8 +1,8 @@
 // constants
 var fs = require('fs');
-var guidesData = require('../src/cache/guides.json');
-var exifData = require('../src/cache/photos.json');
-var gpsData = require('../src/cache/routes.json');
+var guideCache = require('../src/cache/guides.json');
+var exifCache = require('../src/cache/photos.json');
+var gpsCache = require('../src/cache/routes.json');
 var source = '../src/data/';
 var destPath = '../src/cache/guide-data.js';
 var jsonPath = '../src/cache/guides.json';
@@ -29,7 +29,7 @@ var generateQueue = function () {
 	// get the file list
 	var queue = [], srcPath, dstPath,
 		scripts = fs.readdirSync(source),
-		isScript = new RegExp('.json$', 'i');
+		isScript = new RegExp('.js$|.json$', 'i');
 	// for every script in the folder
 	for (var a = 0, b = scripts.length; a < b; a += 1) {
 		// if this isn't a bogus file
@@ -47,7 +47,7 @@ var generateQueue = function () {
 // compile a summary of the guide in the output file
 var addIndex = function () {
 	var overview = {
-		'gps': '_index',
+		'key': '_index',
 		'bounds': {},
 		'markers': []
 	};
@@ -61,8 +61,8 @@ var addIndex = function () {
 		east = Math.max(GuideData[key].bounds.east, east);
 		// formulate a description
 		markers = GuideData[key].markers;
-		first = markers[0].location;
-		last = markers[markers.length - 1].location;
+		first = markers[0];
+		last = markers[markers.length - 1];
 		// add a marker from the centre of the guide
 		overview.markers.push({
 			'type': 'walk',
@@ -102,7 +102,7 @@ var parseGuides = function (queue) {
 				var key = item.split('.js')[0];
 				GuideData[key] = JSON.parse(data.toString());
 				// provide lat and lon for the end points
-				var routeData = flattenCoordinates(gpsData[key]);
+				var routeData = flattenCoordinates(gpsCache[key]);
 				var startMarker = GuideData[key].markers[0];
 				if (!startMarker.lon) {
 					startMarker.lon = routeData[0][0];
@@ -115,12 +115,12 @@ var parseGuides = function (queue) {
 				}
 				// add the photo exif data to markers with a photo
 				var markerData;
-				var alias = (GuideData[key].alias) ? GuideData[key].alias.prefix : key;
+				var alias = (GuideData[key].alias) ? GuideData[key].alias.key : key;
 				for (var marker in GuideData[key].markers) {
 					markerData = GuideData[key].markers[marker];
 					if (markerData.photo) {
-						markerData.lon = exifData[alias][markerData.photo].lon,
-						markerData.lat = exifData[alias][markerData.photo].lat
+						markerData.lon = exifCache[alias][markerData.photo].lon,
+						markerData.lat = exifCache[alias][markerData.photo].lat
 					}
 				}
 				// determine map bounds
@@ -143,9 +143,8 @@ var parseGuides = function (queue) {
 				GuideData[key].bounds.south = tile2lat(lat2tile(south, 15), 15);
 				GuideData[key].bounds.east = tile2long(long2tile(east, 15), 15);
 				// prefill the "bounds" from guides that are a subset of another guide
-				if (GuideData[key].alias && guidesData[prefix] && guidesData[prefix].bounds) {
-					var prefix = GuideData[key].alias.prefix;
-					GuideData[key].alias.bounds = guidesData[prefix].bounds;
+				if (GuideData[key].alias && guideCache[alias] && guideCache[alias].bounds) {
+					GuideData[key].alias.bounds = guideCache[alias].bounds;
 				}
 				// save the converted guide
 				fs.writeFile(source + item, JSON.stringify(GuideData[key]), function (error) {
@@ -156,7 +155,7 @@ var parseGuides = function (queue) {
 		});
 	} else {
 		// add the index
-		//addIndex();
+		addIndex();
 		// convert to string
 		var data = JSON.stringify(GuideData);
 		// write the JSON data to disk

@@ -39,9 +39,10 @@ Localmap.prototype.Modal = function (parent) {
 	this.update = function() {};
 
 	this.show = function(markerData) {
+		var key = this.config.alias || this.config.key;
 		// display the photo if available
 		if (markerData.photo) {
-			this.photo.style.backgroundImage = 'url(' + this.config.photosUrl + markerData.photo + '), url(' + this.config.thumbsUrl + markerData.photo + ')';
+			this.photo.style.backgroundImage = 'url(' + this.config.photosUrl.replace('{key}', key) + markerData.photo + '), url(' + this.config.thumbsUrl.replace('{key}', key) + markerData.photo + ')';
       this.photo.className = 'localmap-modal-photo';
 		} else {
 			this.photo.style.backgroundImage = 'url(' + this.config.markersUrl.replace('{type}', markerData.type) + ')';

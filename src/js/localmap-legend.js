@@ -18,18 +18,21 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
   };
 
 	this.update = function() {
+		var key = this.config.key;
+		var guideData = this.config.guideData[key];
     // write the legend if needed and available
-    if (this.config.legend && this.elements.length === 0) this.elements = this.config.guideData.markers.map(this.addDefinition.bind(this));
+    if (this.config.legend && this.elements.length === 0){
+			this.elements = guideData.markers.map(this.addDefinition.bind(this));
+		}
   };
 
-  this.addDefinition = function(markerData, index) {
+  this.addDefinition = function(markerData) {
     var definitionData = {};
     // if the marker has a description
     if (markerData.description) {
       // format the path to the external assets
-      var guideData = this.config.guideData;
-      var key = (guideData.alias) ? guideData.alias.prefix : guideData.gps;
-      var image = (markerData.photo) ? this.config.thumbsUrl + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
+			var key = this.config.alias || this.config.key;
+      var image = (markerData.photo) ? this.config.thumbsUrl.replace('{key}', key) + markerData.photo : this.config.markersUrl.replace('{type}', markerData.type);
       var text = markerData.description || markerData.type;
       // create a container for the elements
       var fragment = document.createDocumentFragment();

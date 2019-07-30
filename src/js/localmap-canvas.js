@@ -1,5 +1,5 @@
 // extend the class
-Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClicked, onMapFocus) {
+Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMapFocus) {
 
 	// PROPERTIES
 
@@ -7,6 +7,9 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 	this.config = parent.config;
 	this.element = document.createElement('div');
 	this.config.canvasElement = this.element;
+	this.onComplete = onComplete;
+	this.onMarkerClicked = onMarkerClicked;
+	this.onMapFocus = onMapFocus;
 
 	// METHODS
 
@@ -16,6 +19,8 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		this.element.addEventListener('transitionend', this.onUpdated.bind(this));
 		// add the canvas to the parent container
 		this.config.container.appendChild(this.element);
+		// start adding components in turn
+		this.addMarkers();
 	};
 
   this.stop = function() {
@@ -43,8 +48,8 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 		var max = this.config.maximum;
 		var pos = this.config.position;
 		// convert the lon,lat to x,y
-		var centerX = (pos.lon - min.lon) / (max.lon - min.lon) * element.offsetWidth;
-		var centerY = (pos.lat - min.lat) / (max.lat - min.lat) * element.offsetHeight;
+		var centerX = (pos.lon - min.lon_cover) / (max.lon_cover - min.lon_cover) * element.offsetWidth;
+		var centerY = (pos.lat - min.lat_cover) / (max.lat_cover - min.lat_cover) * element.offsetHeight;
 		// limit the zoom
 		var zoom = Math.max(Math.min(pos.zoom, max.zoom), min.zoom);
 		// convert the center into an offset
@@ -61,16 +66,28 @@ Localmap.prototype.Canvas = function (parent, onBackgroundComplete, onMarkerClic
 	// CLASSES
 
   this.components = {
-		background: new parent.Background(this, onBackgroundComplete),
-		markers: new parent.Markers(this, onMarkerClicked),
-		indicator: new parent.Indicator(this, onMarkerClicked, onMapFocus),
-		route: new parent.Route(this),
+		indicator: new parent.Indicator(this, this.onMarkerClicked.bind(this), this.onMapFocus.bind(this)),
 		location: new parent.Location(this)
   };
 
 	// EVENTS
 
-	this.onUpdated = function (evt) {
+	this.addMarkers = function() {
+		// add the markers to the canvas
+		this.components.markers = new parent.Markers(this, this.onMarkerClicked.bind(this), this.addBackground.bind(this));
+	};
+
+	this.addBackground = function() {
+		// add the background to the canvas
+		this.components.background = new parent.Background(this, this.addRoute.bind(this));
+	};
+
+	this.addRoute = function() {
+		// add the route to the canvas
+		this.components.route = new parent.Route(this, this.onComplete.bind(this));
+	};
+
+	this.onUpdated = function(evt) {
 		// remove the transition
 		this.element.className = this.element.className.replace(/ localmap-canvas-transition/g, '');
 	};

@@ -5,16 +5,22 @@ Localmap.prototype.Background = function (parent, onComplete) {
 
 	this.parent = parent;
 	this.config = parent.config;
-	this.element = new Image();
+	this.element = null;
+	this.image = null;
 	this.onComplete = onComplete;
 
 	// METHODS
 
 	this.start = function() {
-		// load the map
-		this.element.addEventListener('load', this.onBackgroundLoaded.bind(this));
+		var key = this.config.alias || this.config.key;
+		// create the canvas
+		this.element = document.createElement('canvas');
 		this.element.setAttribute('class', 'localmap-background');
-		this.element.setAttribute('src', this.config.mapUrl);
+		this.parent.element.appendChild(this.element);
+		// load the map
+		this.image = new Image();
+		this.image.addEventListener('load', this.onBackgroundLoaded.bind(this));
+		this.image.setAttribute('src', this.config.mapUrl.replace('{key}', key));
 		// catch window resizes
 		window.addEventListener('resize', this.redraw.bind(this));
 	};
@@ -29,33 +35,35 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.redraw = function() {
 		var container = this.config.container;
 		var element = this.element;
+		var image = this.image;
 		var min = this.config.minimum;
 		var max = this.config.maximum;
-		var displayWidth = this.element.naturalWidth / 2;
-		var displayHeight = this.element.naturalHeight / 2;
+		// use the bounds of subsets of walks
+		var pixelsPerLon = image.naturalWidth / (max.lon - min.lon);
+		var pixelsPerLat = image.naturalHeight / (max.lat - min.lat);
+		var offsetWidth = (min.lon - min.lon_cover) * pixelsPerLon;
+		var offsetHeight = (min.lat - min.lat_cover) * pixelsPerLat;
+		var croppedWidth = (max.lon_cover - min.lon_cover) * pixelsPerLon;
+		var croppedHeight = (max.lat_cover - min.lat_cover) * pixelsPerLat;
+		var displayWidth = croppedWidth / 2;
+		var displayHeight = croppedHeight / 2;
+		// set the size of the canvas to the bitmap
+		element.width = croppedWidth;
+		element.height = croppedHeight;
+		// double up the bitmap to retina size
+		element.style.width = displayWidth + 'px';
+		element.style.height = displayHeight + 'px';
 		// calculate the limits
 		min.zoom = Math.max(container.offsetWidth / displayWidth, container.offsetHeight / displayHeight);
 		max.zoom = 2;
-		// calculate the center
-		var centerX = (container.offsetWidth - displayWidth * min.zoom) / 2;
-		var centerY = (container.offsetHeight - displayHeight * min.zoom) / 2;
-		// store the initial position
-    this.config.position.lon = (min.lon_cover + max.lon_cover) / 2;
-		this.config.position.lat = (min.lat_cover + max.lat_cover) / 2;
-		this.config.position.zoom = min.zoom * 1.1;
-		// position the canvas
-		this.parent.element.style.transform = 'translate(' + centerX + 'px, ' + centerY + 'px) scale(' + min.zoom + ')';
-		// insert the image into the canvas
-		this.parent.element.appendChild(this.element);
+		// paste the image into the canvas
+		element.getContext('2d').drawImage(image, offsetWidth, offsetHeight);
 	};
 
 	// EVENTS
 
 	this.onBackgroundLoaded = function(evt) {
-		// double up the bitmap to retina size
-		this.element.style.width = (this.element.naturalWidth / 2) + 'px';
-		this.element.style.height = (this.element.naturalHeight / 2) + 'px';
-		// center the background
+		// position the background
 		this.redraw();
 		// resolve the promise
 		onComplete();

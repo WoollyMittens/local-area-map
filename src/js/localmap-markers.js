@@ -1,20 +1,22 @@
 // extend the class
-Localmap.prototype.Markers = function (parent, onMarkerClicked) {
+Localmap.prototype.Markers = function (parent, onClicked, onComplete) {
 
 	// PROPERTIES
 
 	this.parent = parent;
 	this.config = parent.config;
 	this.elements = [];
-	this.onMarkerClicked = onMarkerClicked;
 	this.zoom = null;
 	this.delay = null;
+	this.onComplete = onComplete;
+	this.onClicked = onClicked;
 
 	// METHODS
 
 	this.start = function() {
+		var key = this.config.key;
 		// if cached data is available
-		if (this.config.guideData) {
+		if (this.config.guideData && this.config.guideData[key]) {
 			// add the markers from the guide
 			this.addGuide();
 		// otherwise
@@ -22,7 +24,7 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 			// load the guide's JSON first
 			var guideXhr = new XMLHttpRequest();
 			guideXhr.addEventListener('load', this.onGuideLoaded.bind(this));
-			guideXhr.open('GET', this.config.guideUrl, true);
+			guideXhr.open('GET', this.config.guideUrl.replace('{key}', this.config.key), true);
 			guideXhr.send();
 		}
 	};
@@ -51,10 +53,13 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 
 	this.addGuide = function() {
 		var config = this.config;
-		var guideData = this.config.guideData;
+		var key = this.config.key;
+		var guideData = this.config.guideData[key];
+		// store the key
+		config.alias = (guideData.alias) ? guideData.alias.key : guideData.key;
 		// store the interpolation limits
-		var min = this.config.minimum;
-		var max = this.config.maximum;
+		var min = config.minimum;
+		var max = config.maximum;
 		min.lon = (guideData.alias) ? guideData.alias.bounds.west : guideData.bounds.west;
 		min.lat = (guideData.alias) ? guideData.alias.bounds.north : guideData.bounds.north;
 		max.lon = (guideData.alias) ? guideData.alias.bounds.east : guideData.bounds.east;
@@ -69,12 +74,14 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		config.position.lat = (max.lat_cover - min.lat_cover) / 2;
 		// position every marker in the guide
 		guideData.markers.map(this.addMarker.bind(this));
+		// resolve completion
+		this.onComplete();
 	};
 
 	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
-		markerData.element.addEventListener('click', this.onMarkerClicked.bind(this, markerData));
+		markerData.element.addEventListener('click', this.onClicked.bind(this, markerData));
 		this.parent.element.appendChild(markerData.element);
 		this.elements.push(markerData.element);
 	}
@@ -84,8 +91,8 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		var max = this.config.maximum;
 		var element = document.createElement('span');
 		element.setAttribute('class', 'localmap-waypoint');
-		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
-		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		element.style.left = ((markerData.lon - min.lon_cover) / (max.lon_cover - min.lon_cover) * 100) + '%';
+		element.style.top = ((markerData.lat - min.lat_cover) / (max.lat_cover - min.lat_cover) * 100) + '%';
 		element.style.cursor = 'pointer';
 		return element;
 	};
@@ -97,8 +104,8 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 		element.setAttribute('src', this.config.markersUrl.replace('{type}', markerData.type));
 		element.setAttribute('title', markerData.description || '');
 		element.setAttribute('class', 'localmap-marker');
-		element.style.left = ((markerData.lon - min.lon) / (max.lon - min.lon) * 100) + '%';
-		element.style.top = ((markerData.lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+		element.style.left = ((markerData.lon - min.lon_cover) / (max.lon_cover - min.lon_cover) * 100) + '%';
+		element.style.top = ((markerData.lat - min.lat_cover) / (max.lat_cover - min.lat_cover) * 100) + '%';
 		element.style.cursor = (markerData.description || markerData.callback) ? 'pointer' : null;
 		return element;
 	};
@@ -107,7 +114,8 @@ Localmap.prototype.Markers = function (parent, onMarkerClicked) {
 
 	this.onGuideLoaded = function(evt) {
 		// decode the guide data
-		this.config.guideData = JSON.parse(evt.target.response);
+		this.config.guideData = this.config.guideData || {};
+		this.config.guideData[this.config.key] = JSON.parse(evt.target.response);
 		// add the markers from the guide
 		this.addGuide();
 	};

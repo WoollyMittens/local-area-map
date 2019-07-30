@@ -1,37 +1,40 @@
 // extend the class
-Localmap.prototype.Route = function (parent) {
+Localmap.prototype.Route = function (parent, onComplete) {
 
 	// PROPERTIES
 
 	this.parent = parent;
 	this.config = parent.config;
-	this.elements = [];
+	this.element = null;
 	this.coordinates = [];
 	this.zoom = null;
 	this.delay = null;
+	this.onComplete = onComplete;
 
 	// METHODS
 
 	this.start = function() {
+		var key = this.config.key;
 		// create a canvas
-		this.canvas = document.createElement('canvas');
-		this.canvas.setAttribute('class', 'localmap-route')
-		this.parent.element.appendChild(this.canvas);
+		this.element = document.createElement('canvas');
+		this.element.setAttribute('class', 'localmap-route')
+		this.parent.element.appendChild(this.element);
 		// use the JSON immediately
-		if (this.config.routeData) {
-			this.onJsonLoaded(this.config.routeData);
+		if (this.config.routeData && this.config.routeData[key]) {
+			this.onJsonLoaded(this.config.routeData[key]);
+		}
 		// or load the route's GPX first
-		} else {
+		else {
 			var routeXhr = new XMLHttpRequest();
 			routeXhr.addEventListener('load', this.onGpxLoaded.bind(this));
-			routeXhr.open('GET', this.config.routeUrl, true);
+			routeXhr.open('GET', this.config.routeUrl.replace('{key}', key), true);
 			routeXhr.send();
 		}
 	};
 
   this.stop = function() {
     // remove the element
-    this.parent.element.removeChild(this.canvas);
+    this.parent.element.removeChild(this.element);
   };
 
 	this.update = function() {
@@ -45,13 +48,15 @@ Localmap.prototype.Route = function (parent) {
 	};
 
 	this.redraw = function() {
+		var min = this.config.minimum;
+		var max = this.config.maximum;
 		// adjust the height of the canvas
-		this.canvas.width = this.parent.element.offsetWidth;
-		this.canvas.height = this.parent.element.offsetHeight;
+		this.element.width = this.parent.element.offsetWidth;
+		this.element.height = this.parent.element.offsetHeight;
 		// position every trackpoint in the route
-		var ctx = this.canvas.getContext('2d');
+		var ctx = this.element.getContext('2d');
 		// (re)draw the route
-		var x0, y0, x1, y1, z = this.config.position.zoom, w = this.canvas.width, h = this.canvas.height;
+		var x0, y0, x1, y1, z = this.config.position.zoom, w = this.element.width, h = this.element.height;
 		ctx.clearRect(0, 0, w, h);
 		ctx.lineWidth = 4 / z;
 		ctx.strokeStyle = 'orange';
@@ -59,10 +64,10 @@ Localmap.prototype.Route = function (parent) {
 		for (var key in this.coordinates) {
 			if (this.coordinates.hasOwnProperty(key) && key % 1 == 0) {
         // calculate the current step
-				x1 = parseInt((this.coordinates[key][0] - this.config.minimum.lon) / (this.config.maximum.lon - this.config.minimum.lon) * w);
-				y1 = parseInt((this.coordinates[key][1] - this.config.minimum.lat) / (this.config.maximum.lat - this.config.minimum.lat) * h);
+				x1 = parseInt((this.coordinates[key][0] - min.lon_cover) / (max.lon_cover - min.lon_cover) * w);
+				y1 = parseInt((this.coordinates[key][1] - min.lat_cover) / (max.lat_cover - min.lat_cover) * h);
         // if the step seems valid, draw the step
-  			if ((Math.abs(x1 - x0) + Math.abs(y1 - y0)) < 50) { ctx.lineTo(x1, y1); }
+  			if ((Math.abs(x1 - x0) + Math.abs(y1 - y0)) < 30) { ctx.lineTo(x1, y1); }
         // or jump unlikely/erroneous steps
         else { ctx.moveTo(x1, y1); }
         // store current step as the previous step
@@ -89,6 +94,8 @@ Localmap.prototype.Route = function (parent) {
 		this.coordinates = [].concat.apply([], segments);
     // redraw
     this.redraw();
+		// resolve completion
+		this.onComplete();
 	};
 
 	this.onGpxLoaded = function(evt) {
@@ -102,6 +109,8 @@ Localmap.prototype.Route = function (parent) {
 		}
     // redraw
     this.redraw();
+		// resolve completion
+		this.onComplete();
 	};
 
 	this.start();

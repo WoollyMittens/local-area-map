@@ -20,12 +20,12 @@
 				<p>Plots GPS data on an interactive offline map of the local area.</p>
 				<p><a class="button downloadButton" href="http://github.com/WoollyMittens/useful-localmap" target="_blank">Download (GitHub)</a></p>
 				<ul class="localmap-example">
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130009.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/adamstown-awabakal-adamstown/pb130009.jpg')">1. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130071.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/adamstown-awabakal-adamstown/pb130071.jpg')">2. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130078_pb130086.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/adamstown-awabakal-adamstown/pb130078_pb130086.jpg')">3. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130101_pb130106.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/adamstown-awabakal-adamstown/pb130101_pb130106.jpg')">4. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130153_pb130162.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/adamstown-awabakal-adamstown/pb130153_pb130162.jpg')">5. Lorem ipsum dolor sit amet.</a></li>
-					<li><a href="./photos/adamstown-awabakal-adamstown/pb130169.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/adamstown-awabakal-adamstown/pb130169.jpg')">6. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./photos/milsonspoint-sydneyharbour-manly/p1310026_p1310032.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/milsonspoint-sydneyharbour-manly/p1310026_p1310032.jpg')">1. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./photos/milsonspoint-sydneyharbour-manly/p1310140_p1310146.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/milsonspoint-sydneyharbour-manly/p1310140_p1310146.jpg')">2. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./photos/milsonspoint-sydneyharbour-manly/p1310186_p1310191.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/milsonspoint-sydneyharbour-manly/p1310186_p1310191.jpg')">3. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./photos/milsonspoint-sydneyharbour-manly/p1310492_p1310500.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/milsonspoint-sydneyharbour-manly/p1310492_p1310500.jpg')">4. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./photos/milsonspoint-sydneyharbour-manly/p1310667_p1310677.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/milsonspoint-sydneyharbour-manly/p1310667_p1310677.jpg')">5. Lorem ipsum dolor sit amet.</a></li>
+					<li><a href="./photos/milsonspoint-sydneyharbour-manly/p1310722_p1310729.jpg" onclick="return localmap.indicate(this)" style="background-image:url('./thumbnails/milsonspoint-sydneyharbour-manly/p1310722_p1310729.jpg')">6. Lorem ipsum dolor sit amet.</a></li>
 				</ul>
 				<p><a href="#" onclick="localmap.unindicate()">Reset</a></p>
 			</article>
@@ -41,20 +41,24 @@
 				<script src="./js/localmap.js"></script>
 				<script>
 					var localmap = new Localmap({
+						'key': 'tarongazoo-sydneyharbour-balmoralbeach',
+						//'key': 'milsonspoint-sydneyharbour-manly',
 						'container': document.querySelector('.localmap'),
 						'legend': document.querySelector('.localmap-legend'),
-						'thumbsUrl': './thumbnails/adamstown-awabakal-adamstown/',
-						'photosUrl': './photos/adamstown-awabakal-adamstown/',
+						// assets
+						'thumbsUrl': './thumbnails/{key}/',
+						'photosUrl': './photos/{key}/',
 						'markersUrl': './img/marker-{type}.svg',
-						'guideUrl': './data/adamstown-awabakal-adamstown.json',
-						'routeUrl': './data/adamstown-awabakal-adamstown.gpx',
-						'mapUrl': './data/adamstown-awabakal-adamstown.png',
 						'exifUrl': './php/imageexif.php?src=../{src}',
-						'guideData': GuideData['adamstown-awabakal-adamstown'],
-						'routeData': GpxData['adamstown-awabakal-adamstown'],
-						'exifData': ExifData['adamstown-awabakal-adamstown'],
-						'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA',
-						'bounds': { 'west': 151.688232421875, 'north': -32.9164853473144, 'east': 151.754150390625, 'south': -33.02708758002872 }
+						'guideUrl': './data/{key}.json',
+						'routeUrl': './data/{key}.gpx',
+						'mapUrl': './data/{key}.png',
+						// cache
+						'guideData': GuideData,
+						'routeData': GpxData,
+						'exifData': ExifData,
+						// attribution
+						'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA'
 					});
 				</script>
 				<!-- Cut above this -->

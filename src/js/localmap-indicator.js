@@ -49,8 +49,9 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
     var lon = input.getAttribute('data-lon') || input.getAttribute('lon');
     var lat = input.getAttribute('data-lat') || input.getAttribute('lat');
     // try to get the coordinates from the cached exif data
+		var key = this.config.alias || this.config.key;
     var filename = (source) ? source.split('/').pop() : null;
-    var cached = (this.config.exifData) ? this.config.exifData[filename] : {};
+    var cached = (this.config.exifData && this.config.exifData[key]) ? this.config.exifData[key][filename] : {};
     // populate the indicator's model
     this.config.indicator = {
       'photo': filename,
@@ -99,15 +100,15 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 		var lon = this.config.indicator.lon;
 		var lat = this.config.indicator.lat;
 		// if the location is within bounds
-		if (lon > min.lon && lon < max.lon && lat < min.lat && lat > max.lat) {
+		if (lon > min.lon_cover && lon < max.lon_cover && lat < min.lat_cover && lat > max.lat_cover) {
 			// store the new position
 			this.lon = lon;
 			this.lat = lat;
 			// display the marker
 			this.element.style.cursor = (this.config.indicator.description) ? 'pointer' : 'default';
 			this.element.style.display = 'block';
-			this.element.style.left = ((lon - min.lon) / (max.lon - min.lon) * 100) + '%';
-			this.element.style.top = ((lat - min.lat) / (max.lat - min.lat) * 100) + '%';
+			this.element.style.left = ((lon - min.lon_cover) / (max.lon_cover - min.lon_cover) * 100) + '%';
+			this.element.style.top = ((lat - min.lat_cover) / (max.lat_cover - min.lat_cover) * 100) + '%';
 		// otherwise
 		} else {
 			// hide the marker
