@@ -22,6 +22,8 @@ var Localmap = function(config) {
     'guideUrl': null,
     'routeUrl': null,
     'mapUrl': null,
+    'tilesUrl': null,
+    'tilesZoom': 15,
     'exifUrl': null,
     'guideData': null,
     'routeData': null,
