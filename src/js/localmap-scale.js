@@ -43,7 +43,9 @@ Localmap.prototype.Scale = function (parent) {
 		// use a fraction of that as the scale
 		var scaleSize = visible * mapSize / 6;
 		// round to the nearest increment
-		var scale = 50, label = '50km';
+		var scale = 100, label = '100km';
+		if (scaleSize < 50) { scale = 50; label = '50km' }
+		if (scaleSize < 20) { scale = 20; label = '20km' }
 		if (scaleSize < 10) { scale = 10; label = '10km' }
 		if (scaleSize < 5) { scale = 5; label = '5km' }
 		if (scaleSize < 2) { scale = 2; label = '2km' }

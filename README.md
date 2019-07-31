@@ -53,21 +53,30 @@ var Localmap = require('js/localmap.js');
 
 ```javascript
 var localmap = new Localmap({
+	'key': 'tarongazoo-sydneyharbour-balmoralbeach',
+	//'key': 'milsonspoint-sydneyharbour-manly',
 	'container': document.querySelector('.localmap'),
 	'legend': document.querySelector('.localmap-legend'),
-	'thumbsUrl': './inc/',
-	'photosUrl': '//www.sydneytrainwalks.com/inc/',
-	'markersUrl': 'img/marker-{type}.svg',
-	'mapUrl': 'data/adamstown-awabakal-adamstown.png',
-	'guideUrl': 'data/adamstown-awabakal-adamstown.json',
-	'routeUrl': 'data/adamstown-awabakal-adamstown.gpx',
-	'exifUrl': 'php/imageexif.php?src=../photos/{src}',
-	'guideData': GuideData['adamstown-awabakal-adamstown'],
-	'routeData': GpxData['adamstown-awabakal-adamstown'],
-	'exifData': ExifData['adamstown-awabakal-adamstown'],
+	// assets
+	'thumbsUrl': './thumbnails/{key}/',
+	'photosUrl': './photos/{key}/',
+	'markersUrl': './img/marker-{type}.svg',
+	'exifUrl': './php/imageexif.php?src=../{src}',
+	'guideUrl': './data/{key}.json',
+	'routeUrl': './data/{key}.gpx',
+	'mapUrl': './data/{key}.png',
+	//'tilesUrl': './tiles/{z}/{x}/{y}.png',
+	//'tilesZoom': 15,
+	// cache
+	'guideData': GuideData,
+	'routeData': GpxData,
+	'exifData': ExifData,
+	// attribution
 	'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA'
 });
 ```
+
+**key : {String}** - A common file name pattern for all assets.
 
 **container : {DOM node}** - The HTML DOM element that will contain the map.
 
@@ -79,13 +88,17 @@ var localmap = new Localmap({
 
 **markersUrl : {String}** - Template for the path to the marker images.
 
-**mapUrl : {String}** - Path to the map image to display.
+**exifUrl : {String}** - Path a webservice that extracts geolocation data from photos.
 
 **guideUrl : {String}** - Path to the JSON guide to display.
 
 **routeUrl : {String}** - Path to the GPX route to display.
 
-**exifUrl : {String}** - Path a webservice that extracts geolocation data from photos.
+**mapUrl : {String}** - Optionally a path to the single image background to use INSTEAD of OpenStreetMap map tiles.
+
+**tilesUrl : {String}** - Optionally a path to OpenStreetMap map tiles to use INSTEAD of a single image background.
+
+**tilesZoom : {String}** - The OpenStreetMap zoom level of the map tiles.
 
 **guideData : {String}** - An optional cache of guides.
 
@@ -141,7 +154,9 @@ The following commands are available for development:
 	+ `node importexif` - Prepares a cache of GPS data of all the photos.
 	+ `node importgpx` - Prepares a cache of GPS data of all routes.
 	+ `node importguides` - Prepares a cache of JSON data for all the guides.
-	+ `node importmaps` - Downloads the required map tiles from an OpenStreetMap server".
+	+ `node importphotos` - Creates thumbnails from the photos.
+	+ `node importtiles` - Downloads the required map tiles from an OpenStreetMap server".
+	+ `node converttiles` - Converts the map tiles to JPG.
 
 ## License
 

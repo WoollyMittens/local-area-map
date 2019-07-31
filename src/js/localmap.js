@@ -130,9 +130,9 @@ var Localmap = function(config) {
     var max = this.config.maximum;
     var min = this.config.minimum;
     this.focus(
-      (max.lon - min.lon) / 2 + min.lon,
-      (max.lat - min.lat) / 2 + min.lat,
-      1.1,
+      (max.lon_cover - min.lon_cover) / 2 + min.lon_cover,
+      (max.lat_cover - min.lat_cover) / 2 + min.lat_cover,
+      min.zoom * 1.25,
       false
     );
   };

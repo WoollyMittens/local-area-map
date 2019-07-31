@@ -130,9 +130,9 @@ var Localmap = function(config) {
     var max = this.config.maximum;
     var min = this.config.minimum;
     this.focus(
-      (max.lon - min.lon) / 2 + min.lon,
-      (max.lat - min.lat) / 2 + min.lat,
-      1.1,
+      (max.lon_cover - min.lon_cover) / 2 + min.lon_cover,
+      (max.lat_cover - min.lat_cover) / 2 + min.lat_cover,
+      min.zoom * 1.25,
       false
     );
   };
@@ -248,10 +248,10 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var tile2long = function tile2long(x,z) { return (x/Math.pow(2,z)*360-180); }
 		var tile2lat = function tile2lat(y,z) { var n=Math.PI-2*Math.PI*y/Math.pow(2,z); return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))); }
 		// calculate the cols and rows of tiles
-		var minX = long2tile(min.lon_cover, 15);
-		var minY = lat2tile(min.lat_cover, 15);
-		var maxX = long2tile(max.lon_cover, 15);
-		var maxY = lat2tile(max.lat_cover, 15);
+		var minX = long2tile(min.lon_cover, this.config.tilesZoom);
+		var minY = lat2tile(min.lat_cover, this.config.tilesZoom);
+		var maxX = long2tile(max.lon_cover, this.config.tilesZoom);
+		var maxY = lat2tile(max.lat_cover, this.config.tilesZoom);
 		// calculate the size of the canvas
 		var croppedWidth = Math.max(maxX - minX, 1) * 256;
 		var croppedHeight = Math.max(maxY - minY, 1) * 256;
@@ -274,11 +274,16 @@ Localmap.prototype.Background = function (parent, onComplete) {
 				});
 			}
 		}
+		this.tilesQueue.reverse();
 		// load the first tile
 		this.image = new Image();
 		this.image.addEventListener('load', this.onTileLoaded.bind(this));
 		this.image.addEventListener('error', this.onTileError.bind(this));
 		this.image.setAttribute('src', this.tilesQueue[this.tilesQueue.length - 1].url);
+		// redraw the component
+		this.redraw();
+		// resolve the promise
+		onComplete();
 	};
 
 	this.drawTile = function(image) {
@@ -289,13 +294,6 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		if (this.tilesQueue.length > 0) {
 			// load the next tile
 			this.image.setAttribute('src', this.tilesQueue[this.tilesQueue.length - 1].url);
-		}
-		// or complete the process
-		else {
-			// redraw the component
-			this.redraw();
-			// resolve the promise
-			onComplete();
 		}
 	};
 
@@ -1325,7 +1323,9 @@ Localmap.prototype.Scale = function (parent) {
 		// use a fraction of that as the scale
 		var scaleSize = visible * mapSize / 6;
 		// round to the nearest increment
-		var scale = 50, label = '50km';
+		var scale = 100, label = '100km';
+		if (scaleSize < 50) { scale = 50; label = '50km' }
+		if (scaleSize < 20) { scale = 20; label = '20km' }
 		if (scaleSize < 10) { scale = 10; label = '10km' }
 		if (scaleSize < 5) { scale = 5; label = '5km' }
 		if (scaleSize < 2) { scale = 2; label = '2km' }
