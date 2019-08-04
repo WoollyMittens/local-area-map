@@ -66,6 +66,9 @@ var Localmap = function(config) {
   // METHODS
 
   this.update = function() {
+    // retard the save state
+    clearTimeout(this.saveTimeout);
+    this.saveTimeout = window.setTimeout(this.store.bind(this), 1000);
     // retard the update
 		window.cancelAnimationFrame(this.animationFrame);
 		this.animationFrame = window.requestAnimationFrame(this.redraw.bind(this));
@@ -85,6 +88,28 @@ var Localmap = function(config) {
     this.config.position.lat = Math.min(Math.max(lat, this.config.maximum.lat_cover), this.config.minimum.lat_cover);
     this.config.position.zoom = Math.max(Math.min(zoom, this.config.maximum.zoom), this.config.minimum.zoom);
     this.update();
+  };
+
+  this.store = function() {
+    // create a save state selected properties
+    var state = {};
+    state[this.config.key] = {
+      'lon': this.config.position.lon,
+      'lat': this.config.position.lat,
+      'zoom': this.config.position.zoom
+    };
+    // save the state to local storage
+    localStorage.setItem('localmap', JSON.stringify(state));
+  };
+
+  this.restore = function(lon, lat, zoom) {
+    // load the state from local storage
+    var state = JSON.parse(localStorage.getItem('localmap'));
+    // if the stored state applied to this instance of the map, restore the value
+    var key = this.config.key;
+    if (state && state[key]) { this.focus(state[key].lon, state[key].lat, state[key].zoom, false); }
+    // otherwise restore the fallback
+    else { this.focus(lon, lat, zoom, false); }
   };
 
   this.describe = function(markerdata) {
@@ -129,11 +154,10 @@ var Localmap = function(config) {
     // global update
     var max = this.config.maximum;
     var min = this.config.minimum;
-    this.focus(
+    this.restore(
       (max.lon_cover - min.lon_cover) / 2 + min.lon_cover,
       (max.lat_cover - min.lat_cover) / 2 + min.lat_cover,
-      min.zoom * 1.25,
-      false
+      min.zoom * 1.25
     );
   };
 

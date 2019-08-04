@@ -6,8 +6,6 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = new Image();
-	this.onMarkerClicked = onMarkerClicked;
-	this.onMapFocus = onMapFocus;
 	this.zoom = null;
 	this.lon = null;
 	this.lat = null;
@@ -85,7 +83,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 		// reset the indicator object
 		this.reset();
     // zoom out a little
-    this.onMapFocus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
+    onMapFocus(this.config.position.lon, this.config.position.lat, this.config.position.zoom * 0.25, true);
 	};
 
 	this.resize = function() {
@@ -146,13 +144,13 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
     // activate the originating element
     this.config.indicator.referrer.setAttribute('data-localmap', 'active');
     // highlight a location with an optional description on the map
-    this.onMapFocus(this.config.indicator.lon, this.config.indicator.lat, this.config.indicator.zoom, true);
+    onMapFocus(this.config.indicator.lon, this.config.indicator.lat, this.config.indicator.zoom, true);
   };
 
 	this.onIndicatorClicked = function(evt) {
 		evt.preventDefault();
 		// report that the indicator was clicked
-		this.onMarkerClicked(this.config.indicator);
+		onMarkerClicked(this.config.indicator);
 	};
 
 	this.start();

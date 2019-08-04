@@ -7,9 +7,6 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 	this.config = parent.config;
 	this.element = document.createElement('div');
 	this.config.canvasElement = this.element;
-	this.onComplete = onComplete;
-	this.onMarkerClicked = onMarkerClicked;
-	this.onMapFocus = onMapFocus;
 
 	// METHODS
 
@@ -66,7 +63,7 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 	// CLASSES
 
   this.components = {
-		indicator: new parent.Indicator(this, this.onMarkerClicked.bind(this), this.onMapFocus.bind(this)),
+		indicator: new parent.Indicator(this, onMarkerClicked, onMapFocus),
 		location: new parent.Location(this)
   };
 
@@ -74,7 +71,7 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 
 	this.addMarkers = function() {
 		// add the markers to the canvas
-		this.components.markers = new parent.Markers(this, this.onMarkerClicked.bind(this), this.addBackground.bind(this));
+		this.components.markers = new parent.Markers(this, onMarkerClicked, this.addBackground.bind(this));
 	};
 
 	this.addBackground = function() {
@@ -84,7 +81,7 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 
 	this.addRoute = function() {
 		// add the route to the canvas
-		this.components.route = new parent.Route(this, this.onComplete.bind(this));
+		this.components.route = new parent.Route(this, onComplete);
 	};
 
 	this.onUpdated = function(evt) {

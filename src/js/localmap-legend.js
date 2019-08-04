@@ -5,7 +5,6 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
 
 	this.parent = parent;
 	this.config = parent.config;
-	this.onLegendClicked = onLegendClicked;
 	this.elements = [];
 
 	// METHODS
@@ -49,8 +48,8 @@ Localmap.prototype.Legend = function (parent, onLegendClicked) {
       fragment.appendChild(definitionData.description);
       // add the event handlers
 			markerData.referrer = definitionData.title;
-      definitionData.title.addEventListener('click', this.onLegendClicked.bind(this, markerData));
-      definitionData.description.addEventListener('click', this.onLegendClicked.bind(this, markerData));
+      definitionData.title.addEventListener('click', onLegendClicked.bind(this, markerData));
+      definitionData.description.addEventListener('click', onLegendClicked.bind(this, markerData));
       // add the container to the legend
       this.config.legend.appendChild(fragment);
     }

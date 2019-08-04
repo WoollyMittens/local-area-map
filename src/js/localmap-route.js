@@ -9,7 +9,6 @@ Localmap.prototype.Route = function (parent, onComplete) {
 	this.coordinates = [];
 	this.zoom = null;
 	this.delay = null;
-	this.onComplete = onComplete;
 
 	// METHODS
 
@@ -95,7 +94,7 @@ Localmap.prototype.Route = function (parent, onComplete) {
     // redraw
     this.redraw();
 		// resolve completion
-		this.onComplete();
+		onComplete();
 	};
 
 	this.onGpxLoaded = function(evt) {
@@ -110,7 +109,7 @@ Localmap.prototype.Route = function (parent, onComplete) {
     // redraw
     this.redraw();
 		// resolve completion
-		this.onComplete();
+		onComplete();
 	};
 
 	this.start();

@@ -8,8 +8,6 @@ Localmap.prototype.Markers = function (parent, onClicked, onComplete) {
 	this.elements = [];
 	this.zoom = null;
 	this.delay = null;
-	this.onComplete = onComplete;
-	this.onClicked = onClicked;
 
 	// METHODS
 
@@ -69,19 +67,20 @@ Localmap.prototype.Markers = function (parent, onClicked, onComplete) {
 		min.lat_cover = guideData.bounds.north;
 		max.lon_cover = guideData.bounds.east;
 		max.lat_cover = guideData.bounds.south;
-		// store the initial position
-		config.position.lon = (max.lon_cover - min.lon_cover) / 2;
-		config.position.lat = (max.lat_cover - min.lat_cover) / 2;
+		// assume an initial position
+		var pos = config.position;
+		pos.lon = (max.lon_cover - min.lon_cover) / 2 + min.lon_cover;
+		pos.lat = (max.lat_cover - min.lat_cover) / 2 + min.lat_cover;
 		// position every marker in the guide
 		guideData.markers.map(this.addMarker.bind(this));
 		// resolve completion
-		this.onComplete();
+		onComplete();
 	};
 
 	this.addMarker = function(markerData) {
 		// add either a landmark or a waypoint to the map
 		markerData.element = (markerData.photo) ? this.addLandmark(markerData) : this.addWaypoint(markerData);
-		markerData.element.addEventListener('click', this.onClicked.bind(this, markerData));
+		markerData.element.addEventListener('click', onClicked.bind(this, markerData));
 		this.parent.element.appendChild(markerData.element);
 		this.elements.push(markerData.element);
 	}

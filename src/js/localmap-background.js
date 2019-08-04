@@ -8,7 +8,6 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.element = null;
 	this.image = null;
 	this.tilesQueue = null;
-	this.onComplete = onComplete;
 
 	// METHODS
 
@@ -79,11 +78,10 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		onComplete();
 	};
 
-	this.loadTiles = function() {
-		var container = this.config.container;
-		var element = this.element;
+	this.measureTiles = function() {
 		var min = this.config.minimum;
 		var max = this.config.maximum;
+		var pos = this.config.position;
 		// Slippy map tilenames - https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#ECMAScript_.28JavaScript.2FActionScript.2C_etc..29
 		var long2tile = function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
 		var lat2tile = function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
@@ -94,9 +92,30 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var minY = lat2tile(min.lat_cover, this.config.tilesZoom);
 		var maxX = long2tile(max.lon_cover, this.config.tilesZoom);
 		var maxY = lat2tile(max.lat_cover, this.config.tilesZoom);
+		// determine the centre tile
+		var state = JSON.parse(localStorage.getItem('localmap'));
+    var key = this.config.key;
+    if (state && state[key]) { pos.lon = state[key].lon; pos.lat = state[key].lat; };
+		var posX = long2tile(pos.lon, this.config.tilesZoom);
+		var posY = lat2tile(pos.lat, this.config.tilesZoom);
+		// return the values
+		return {
+			'minX': minX,
+			'minY': minY,
+			'maxX': maxX,
+			'maxY': maxY,
+			'posX': posX,
+			'posY': posY
+		};
+	};
+
+	this.loadTiles = function() {
+		var container = this.config.container;
+		var element = this.element;
+		var coords = this.measureTiles();
 		// calculate the size of the canvas
-		var croppedWidth = Math.max(maxX - minX, 1) * 256;
-		var croppedHeight = Math.max(maxY - minY, 1) * 256;
+		var croppedWidth = Math.max(coords.maxX - coords.minX, 1) * 256;
+		var croppedHeight = Math.max(coords.maxY - coords.minY, 1) * 256;
 		var displayWidth = croppedWidth / 2;
 		var displayHeight = croppedHeight / 2;
 		// set the size of the canvas to the correct size
@@ -107,16 +126,18 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		element.style.height = displayHeight + 'px';
 		// create a queue of tiles
 		this.tilesQueue = [];
-		for (var x = minX; x <= maxX; x += 1) {
-			for (var y = minY; y <= maxY; y += 1) {
+		for (var x = coords.minX; x <= coords.maxX; x += 1) {
+			for (var y = coords.minY; y <= coords.maxY; y += 1) {
 				this.tilesQueue.push({
 					url: this.config.tilesUrl.replace('{x}', x).replace('{y}', y).replace('{z}', this.config.tilesZoom),
-					x: x - minX,
-					y: y - minY
+					x: x - coords.minX,
+					y: y - coords.minY,
+					d: Math.abs(x - coords.posX) + Math.abs(y - coords.posY)
 				});
 			}
 		}
-		this.tilesQueue.reverse();
+		// render the tiles closest to the centre first
+		this.tilesQueue.sort(function(a, b){return b.d - a.d});
 		// load the first tile
 		this.image = new Image();
 		this.image.addEventListener('load', this.onTileLoaded.bind(this));
