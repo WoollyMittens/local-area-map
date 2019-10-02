@@ -81,8 +81,8 @@ Localmap.prototype.Controls = function (parent) {
 		this.range.lon = this.config.maximum.lon_cover - this.config.minimum.lon_cover;
 		this.range.lat = this.config.maximum.lat_cover - this.config.minimum.lat_cover;
 		this.range.zoom = this.config.maximum.zoom - this.config.minimum.zoom;
-		this.range.x = this.config.canvasElement.offsetWidth * this.config.position.zoom;
-		this.range.y = this.config.canvasElement.offsetHeight * this.config.position.zoom;
+		this.range.x = this.config.canvasWrapper.offsetWidth * this.config.position.zoom;
+		this.range.y = this.config.canvasWrapper.offsetHeight * this.config.position.zoom;
 		// store the initial touch(es)
 		this.touches = evt.touches || [{ 'clientX': evt.clientX, 'clientY': evt.clientY }];
 	};

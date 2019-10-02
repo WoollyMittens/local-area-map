@@ -6,8 +6,9 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = null;
-	this.image = null;
+	this.image = new Image();
 	this.tilesQueue = null;
+  this.resolution = 4096;
 
 	// METHODS
 
@@ -16,6 +17,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		this.element = document.createElement('canvas');
 		this.element.setAttribute('class', 'localmap-background');
 		this.parent.element.appendChild(this.element);
+    this.parent.canvasElement = this.element;
 		// load the map as tiles
 		if (this.config.tilesUrl) { this.loadTiles(); }
 		// or load the map as a bitmap
@@ -44,7 +46,6 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.loadBitmap = function() {
 		var key = this.config.alias || this.config.key;
 		// load the map as a bitmap
-		this.image = new Image();
 		this.image.addEventListener('load', this.onBitmapLoaded.bind(this));
 		this.image.setAttribute('src', this.config.mapUrl.replace('{key}', key));
 	};
@@ -113,9 +114,12 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var container = this.config.container;
 		var element = this.element;
 		var coords = this.measureTiles();
-		// calculate the size of the canvas
-		var croppedWidth = Math.max(coords.maxX - coords.minX, 1) * 256;
-		var croppedHeight = Math.max(coords.maxY - coords.minY, 1) * 256;
+		// calculate the size of the canvas, limit the dimensions to 4096x4096
+    var gridWidth = Math.max(coords.maxX - coords.minX, 1);
+    var gridHeight = Math.max(coords.maxY - coords.minY, 1);
+    var tileSize = Math.min(this.resolution / gridWidth, this.resolution / gridHeight, 256);
+		var croppedWidth = gridWidth * tileSize;
+		var croppedHeight = gridHeight * tileSize;
 		var displayWidth = croppedWidth / 2;
 		var displayHeight = croppedHeight / 2;
 		// set the size of the canvas to the correct size
@@ -132,6 +136,8 @@ Localmap.prototype.Background = function (parent, onComplete) {
 					url: this.config.tilesUrl.replace('{x}', x).replace('{y}', y).replace('{z}', this.config.tilesZoom),
 					x: x - coords.minX,
 					y: y - coords.minY,
+          w: tileSize,
+          h: tileSize,
 					d: Math.abs(x - coords.posX) + Math.abs(y - coords.posY)
 				});
 			}
@@ -152,7 +158,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.drawTile = function(image) {
 		var props = this.tilesQueue.pop();
 		// draw the image onto the canvas
-		if (image) this.element.getContext('2d').drawImage(image, props.x * 256, props.y * 256);
+		if (image) this.element.getContext('2d').drawImage(image, props.x * props.w, props.y * props.h, props.w, props.h);
 		// if there's more tiles in the queue
 		if (this.tilesQueue.length > 0) {
 			// load the next tile

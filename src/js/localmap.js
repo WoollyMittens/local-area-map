@@ -15,6 +15,7 @@ var Localmap = function(config) {
     'key': null,
     'alias': null,
     'container': null,
+    'canvasWrapper': null,
     'canvasElement': null,
     'thumbsUrl': null,
     'photosUrl': null,
