@@ -15,6 +15,7 @@ var Localmap = function(config) {
     'key': null,
     'alias': null,
     'container': null,
+    'canvasWrapper': null,
     'canvasElement': null,
     'thumbsUrl': null,
     'photosUrl': null,
@@ -188,16 +189,24 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = null;
-	this.image = null;
+	this.image = new Image();
 	this.tilesQueue = null;
+  this.resolution = 4096;
 
 	// METHODS
+
+  // Slippy map tilenames - https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#ECMAScript_.28JavaScript.2FActionScript.2C_etc..29
+  var long2tile = function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+  var lat2tile = function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
+  var tile2long = function tile2long(x,z) { return (x/Math.pow(2,z)*360-180); }
+  var tile2lat = function tile2lat(y,z) { var n=Math.PI-2*Math.PI*y/Math.pow(2,z); return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))); }
 
 	this.start = function() {
 		// create the canvas
 		this.element = document.createElement('canvas');
 		this.element.setAttribute('class', 'localmap-background');
 		this.parent.element.appendChild(this.element);
+    this.parent.canvasElement = this.element;
 		// load the map as tiles
 		if (this.config.tilesUrl) { this.loadTiles(); }
 		// or load the map as a bitmap
@@ -220,13 +229,12 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var max = this.config.maximum;
 		// calculate the limits
 		min.zoom = Math.max(container.offsetWidth / element.width * 2, container.offsetHeight / element.height * 2);
-		max.zoom = 2;
+		max.zoom = 3;
 	};
 
 	this.loadBitmap = function() {
 		var key = this.config.alias || this.config.key;
 		// load the map as a bitmap
-		this.image = new Image();
 		this.image.addEventListener('load', this.onBitmapLoaded.bind(this));
 		this.image.setAttribute('src', this.config.mapUrl.replace('{key}', key));
 	};
@@ -264,11 +272,6 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		var min = this.config.minimum;
 		var max = this.config.maximum;
 		var pos = this.config.position;
-		// Slippy map tilenames - https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#ECMAScript_.28JavaScript.2FActionScript.2C_etc..29
-		var long2tile = function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
-		var lat2tile = function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
-		var tile2long = function tile2long(x,z) { return (x/Math.pow(2,z)*360-180); }
-		var tile2lat = function tile2lat(y,z) { var n=Math.PI-2*Math.PI*y/Math.pow(2,z); return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))); }
 		// calculate the cols and rows of tiles
 		var minX = long2tile(min.lon_cover, this.config.tilesZoom);
 		var minY = lat2tile(min.lat_cover, this.config.tilesZoom);
@@ -291,13 +294,44 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		};
 	};
 
+  this.scoreMarkers = function() {
+    var markers = this.config.guideData[this.config.key].markers;
+    var lookup = {};
+    var x, y, t, r, b, l;
+    for (var idx = 0, max = markers.length; idx < max; idx += 1) {
+      x = long2tile(markers[idx].lon, this.config.tilesZoom);
+      y = lat2tile(markers[idx].lat, this.config.tilesZoom);
+      // select coordinates around
+      t = y - 1;
+      r = x + 1;
+      b = t + 1;
+      l = x - 1;
+      // top row
+      lookup[l + '_' + t] = -10;
+      lookup[x + '_' + t] = -10;
+      lookup[r + '_' + t] = -10;
+      // middle row
+      lookup[l + '_' + y] = -10;
+      lookup[x + '_' + y] = -20;
+      lookup[r + '_' + y] = -10;
+      // bottom row
+      lookup[l + '_' + b] = -10;
+      lookup[x + '_' + b] = -10;
+      lookup[r + '_' + b] = -10;
+    }
+    return lookup;
+  };
+
 	this.loadTiles = function() {
 		var container = this.config.container;
 		var element = this.element;
 		var coords = this.measureTiles();
-		// calculate the size of the canvas
-		var croppedWidth = Math.max(coords.maxX - coords.minX, 1) * 256;
-		var croppedHeight = Math.max(coords.maxY - coords.minY, 1) * 256;
+		// calculate the size of the canvas, limit the dimensions to 4096x4096
+    var gridWidth = Math.max(coords.maxX - coords.minX, 1);
+    var gridHeight = Math.max(coords.maxY - coords.minY, 1);
+    var tileSize = Math.min(this.resolution / gridWidth, this.resolution / gridHeight, 256);
+		var croppedWidth = gridWidth * tileSize;
+		var croppedHeight = gridHeight * tileSize;
 		var displayWidth = croppedWidth / 2;
 		var displayHeight = croppedHeight / 2;
 		// set the size of the canvas to the correct size
@@ -308,18 +342,22 @@ Localmap.prototype.Background = function (parent, onComplete) {
 		element.style.height = displayHeight + 'px';
 		// create a queue of tiles
 		this.tilesQueue = [];
+    var scoreLookup = this.scoreMarkers();
 		for (var x = coords.minX; x <= coords.maxX; x += 1) {
 			for (var y = coords.minY; y <= coords.maxY; y += 1) {
 				this.tilesQueue.push({
 					url: this.config.tilesUrl.replace('{x}', x).replace('{y}', y).replace('{z}', this.config.tilesZoom),
 					x: x - coords.minX,
 					y: y - coords.minY,
-					d: Math.abs(x - coords.posX) + Math.abs(y - coords.posY)
+          w: tileSize,
+          h: tileSize,
+					d: Math.abs(x - coords.posX) + Math.abs(y - coords.posY),
+          r: scoreLookup[x + '_' + y] || 0
 				});
 			}
 		}
 		// render the tiles closest to the centre first
-		this.tilesQueue.sort(function(a, b){return b.d - a.d});
+		this.tilesQueue.sort(function(a, b){return (b.d + b.r) - (a.d + a.r)});
 		// load the first tile
 		this.image = new Image();
 		this.image.addEventListener('load', this.onTileLoaded.bind(this));
@@ -334,7 +372,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.drawTile = function(image) {
 		var props = this.tilesQueue.pop();
 		// draw the image onto the canvas
-		if (image) this.element.getContext('2d').drawImage(image, props.x * 256, props.y * 256);
+		if (image) this.element.getContext('2d').drawImage(image, props.x * props.w, props.y * props.h, props.w, props.h);
 		// if there's more tiles in the queue
 		if (this.tilesQueue.length > 0) {
 			// load the next tile
@@ -370,7 +408,8 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = document.createElement('div');
-	this.config.canvasElement = this.element;
+	this.config.canvasWrapper = this.element;
+  this.config.canvasElement = null;
 
 	// METHODS
 
@@ -540,8 +579,8 @@ Localmap.prototype.Controls = function (parent) {
 		this.range.lon = this.config.maximum.lon_cover - this.config.minimum.lon_cover;
 		this.range.lat = this.config.maximum.lat_cover - this.config.minimum.lat_cover;
 		this.range.zoom = this.config.maximum.zoom - this.config.minimum.zoom;
-		this.range.x = this.config.canvasElement.offsetWidth * this.config.position.zoom;
-		this.range.y = this.config.canvasElement.offsetHeight * this.config.position.zoom;
+		this.range.x = this.config.canvasWrapper.offsetWidth * this.config.position.zoom;
+		this.range.y = this.config.canvasWrapper.offsetHeight * this.config.position.zoom;
 		// store the initial touch(es)
 		this.touches = evt.touches || [{ 'clientX': evt.clientX, 'clientY': evt.clientY }];
 	};
@@ -557,11 +596,11 @@ Localmap.prototype.Controls = function (parent) {
 			this.last = new Date() - 500;
 			// for multi touch
 			if (touches.length > 1 && previous.length > 1) {
-				var dX = (Math.abs(touches[0].clientX - touches[1].clientX) - Math.abs(previous[0].clientX - previous[1].clientX)) / this.range.x;
-				var dY = (Math.abs(touches[0].clientY - touches[1].clientY) - Math.abs(previous[0].clientY - previous[1].clientY)) / this.range.y;
+				var dX = (Math.abs(touches[0].clientX - touches[1].clientX) - Math.abs(previous[0].clientX - previous[1].clientX)) / this.config.container.offsetWidth;
+				var dY = (Math.abs(touches[0].clientY - touches[1].clientY) - Math.abs(previous[0].clientY - previous[1].clientY)) / this.config.container.offsetHeight;
 				this.inertia.x = ((touches[0].clientX - previous[0].clientX) + (touches[1].clientX - previous[1].clientX)) / 2 / this.range.x;
 				this.inertia.y = ((touches[0].clientY - previous[0].clientY) + (touches[1].clientY - previous[1].clientY)) / 2 / this.range.y;
-				this.inertia.z = ((dX + dY) > 0) ? this.steps.z : ((dX + dY) < 0) ? -this.steps.z : 0;
+				this.inertia.z = (dX + dY) / 2;
 			} else {
 				this.inertia.x = (touches[0].clientX - previous[0].clientX) / this.range.x;
 				this.inertia.y = (touches[0].clientY - previous[0].clientY) / this.range.y;
@@ -1356,7 +1395,7 @@ Localmap.prototype.Scale = function (parent) {
 			{'lon': this.config.maximum.lon_cover, 'lat': this.config.maximum.lat_cover}
 		);
 		// what portion of that is in the container
-		var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
+		var visible = this.config.container.offsetWidth / this.config.canvasWrapper.offsetWidth / this.config.position.zoom;
 		// use a fraction of that as the scale
 		var scaleSize = visible * mapSize / 6;
 		// round to the nearest increment
