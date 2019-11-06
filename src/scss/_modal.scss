@@ -7,7 +7,7 @@
   background-color: #fff;
   box-shadow: 0 5px 10px rgba(0,0,0,0.5);
   z-index: 9;
-  transform: translate(-125%, 0);
+  transform: translate3d(-125%, 0, 0);
   transition: transform ease 500ms;
   display: flex;
   flex-direction: column;
@@ -50,7 +50,7 @@
   }
 
   &-visible {
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 0);
   }
 
   &-closer {

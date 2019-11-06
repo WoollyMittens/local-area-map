@@ -58,7 +58,7 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom);
 		// position the background
 		if (this.config.useTransitions) this.element.className += ' localmap-canvas-transition';
-		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
+		element.style.transform = 'translate3d(' + offsetX + 'px, ' + offsetY + 'px, 0px) scale3d(' + zoom + ', ' + zoom + ',1)';
 	};
 
 	// CLASSES

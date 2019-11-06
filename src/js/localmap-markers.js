@@ -45,7 +45,7 @@ Localmap.prototype.Markers = function (parent, onClicked, onComplete) {
 		// redraw the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
-			this.elements[key].style.transform = 'scale(' + scale + ')'
+			this.elements[key].style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)'
 		}
 	};
 

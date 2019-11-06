@@ -49,7 +49,7 @@ Localmap.prototype.Location = function (parent) {
 	this.resize = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
-		this.element.style.transform = 'scale(' + scale + ')';
+		this.element.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
 	};
 
 	this.requestPosition = function() {

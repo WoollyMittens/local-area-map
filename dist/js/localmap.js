@@ -191,7 +191,7 @@ Localmap.prototype.Background = function (parent, onComplete) {
 	this.element = null;
 	this.image = new Image();
 	this.tilesQueue = null;
-  this.resolution = 4096;
+  this.resolution = (/android 5|android 6|android 7/i.test(navigator.userAgent)) ? 3072 : 4096;
 
 	// METHODS
 
@@ -460,7 +460,7 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 		offsetY = Math.max(Math.min(offsetY, 0), container.offsetHeight - element.offsetHeight * zoom);
 		// position the background
 		if (this.config.useTransitions) this.element.className += ' localmap-canvas-transition';
-		element.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + zoom + ')';
+		element.style.transform = 'translate3d(' + offsetX + 'px, ' + offsetY + 'px, 0px) scale3d(' + zoom + ', ' + zoom + ',1)';
 	};
 
 	// CLASSES
@@ -806,7 +806,7 @@ Localmap.prototype.Indicator = function (parent, onMarkerClicked, onMapFocus) {
 	this.resize = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
-		this.element.style.transform = 'scale(' + scale + ')';
+		this.element.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
 	};
 
 	this.reposition = function() {
@@ -990,7 +990,7 @@ Localmap.prototype.Location = function (parent) {
 	this.resize = function() {
 		// resize the marker according to scale
 		var scale = 1 / this.config.position.zoom;
-		this.element.style.transform = 'scale(' + scale + ')';
+		this.element.style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)';
 	};
 
 	this.requestPosition = function() {
@@ -1086,7 +1086,7 @@ Localmap.prototype.Markers = function (parent, onClicked, onComplete) {
 		// redraw the markers according to scale
 		var scale = 1 / this.config.position.zoom;
 		for (var key in this.elements) {
-			this.elements[key].style.transform = 'scale(' + scale + ')'
+			this.elements[key].style.transform = 'scale3d(' + scale + ', ' + scale + ', 1)'
 		}
 	};
 
