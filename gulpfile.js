@@ -5,7 +5,6 @@ var project = __dirname.split(/\/|-/).pop();
 // dependencies
 
 var gulp = require('gulp');
-var del = require('del');
 var connect = require('gulp-connect');
 var connectphp = require('gulp-connect-php');
 var sass = require('gulp-sass');
@@ -97,12 +96,10 @@ function task_assets(cb) {
 	gulp.src('src/xml/**/*').pipe(gulp.dest('dist/xml/'));
 	gulp.src('src/lib/**/*').pipe(gulp.dest('dist/lib/'));
 	gulp.src('src/data/**/*').pipe(gulp.dest('dist/data/'));
-	gulp.src('src/cache/**/*').pipe(gulp.dest('dist/cache/'));
+	gulp.src('src/tiles/**/*').pipe(gulp.dest('dist/tiles/'));
 	gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts/'));
 	gulp.src('src/json/**/*').pipe(gulp.dest('dist/json/'));
 	gulp.src('src/photos/**/*').pipe(gulp.dest('dist/photos/'));
-	gulp.src('src/thumbnails/**/*').pipe(gulp.dest('dist/thumbnails/'));
-	gulp.src('src/php/**/*').pipe(gulp.dest('dist/php/'));
 	cb();
 }
 
@@ -125,7 +122,9 @@ function task_styles_dev(cb) {
   	.pipe(sourcemaps.init())
 		.pipe(sass())
 		.on('error', sass.logError)
-		.pipe(autoprefixer())
+		.pipe(autoprefixer({
+			cascade: false
+		}))
   	.pipe(sourcemaps.write())
 		.pipe(gulp.dest('dist/css/'));
 	cb();
@@ -136,7 +135,9 @@ function task_styles_dist(cb) {
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
-		.pipe(autoprefixer())
+		.pipe(autoprefixer({
+			cascade: false
+		}))
 		.pipe(gulp.dest('dist/css/'));
 	cb();
 }
