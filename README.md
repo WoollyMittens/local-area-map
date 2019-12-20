@@ -61,7 +61,7 @@ var localmap = new Localmap({
 	'thumbsUrl': './thumbnails/{key}/',
 	'photosUrl': './photos/{key}/',
 	'markersUrl': './img/marker-{type}.svg',
-	'exifUrl': './php/imageexif.php?src=../{src}',
+	'exifUrl': './php/imageexif.php?src={src}',
 	'guideUrl': './data/{key}.json',
 	'routeUrl': './data/{key}.gpx',
 	'mapUrl': './data/{key}.png',
