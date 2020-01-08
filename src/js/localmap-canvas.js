@@ -7,7 +7,6 @@ Localmap.prototype.Canvas = function (parent, onComplete, onMarkerClicked, onMap
 	this.config = parent.config;
 	this.element = document.createElement('div');
 	this.config.canvasWrapper = this.element;
-  this.config.canvasElement = null;
 
 	// METHODS
 
