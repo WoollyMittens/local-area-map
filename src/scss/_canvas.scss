@@ -15,6 +15,11 @@
 &-background {
   display: block;
   user-select: none;
+  position: relative;
+}
+
+&-tile {
+  position: absolute;
 }
 
 &-route {
