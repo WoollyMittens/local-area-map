@@ -2,7 +2,9 @@
 
 Plots GPS data on an interactive offline map of the local area.
 
-Try the <a href="http://www.woollymittens.nl/default.php?url=useful-localmap">demo</a>.
+Try the [demo](http://www.woollymittens.nl/default.php?url=useful-localmap).
+
+Visit [sydneytrainwalks.com](https://sydneytrainwalks.com/) or [sydneyhikingtrips.com](https://sydneyhikingtrips.com/) for a practical application of this library.
 
 ## How to include the script
 
