@@ -1,8 +1,8 @@
 // constants
 var gm = require('gm');
 var fs = require('fs');
-var photos = '../src/photos/';
-var thumbnails = '../src/thumbnails/';
+var photos = '../photos/';
+var thumbnails = '../thumbnails/';
 
 // generates a resize queue
 var generateQueue = function() {

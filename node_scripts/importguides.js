@@ -1,11 +1,11 @@
 // constants
 var fs = require('fs');
-var guideCache = require('../src/cache/guides.json');
-var exifCache = require('../src/cache/photos.json');
-var gpsCache = require('../src/cache/routes.json');
-var source = '../src/data/';
-var destPath = '../src/cache/guide-data.js';
-var jsonPath = '../src/cache/guides.json';
+var guideCache = require('../cache/guides.json');
+var exifCache = require('../cache/photos.json');
+var gpsCache = require('../cache/routes.json');
+var source = '../data/';
+var destPath = '../cache/guide-data.js';
+var jsonPath = '../cache/guides.json';
 var GuideData = {};
 
 // Slippy map tilenames - https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#ECMAScript_.28JavaScript.2FActionScript.2C_etc..29

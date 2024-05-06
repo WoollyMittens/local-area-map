@@ -26,11 +26,11 @@ const tileTemplate = 'https://tile.thunderforest.com/neighbourhood/{z}/{x}/{y}.p
 const fs = require('fs');
 const {Image, createCanvas} = require('canvas');
 const request = require('request');
-const guideCache = require('../src/cache/guides.json');
-const targetPath = '../src/data/';
-const tileCache = '../src/tiles/{z}/{x}/{y}.png';
-const tileTemplate = 'http://4umaps.eu/{z}/{x}/{y}.png';
-const tileMissing = '../src/img/missing.png';
+const guideCache = require('../cache/guides.json');
+const targetPath = '../data/';
+const tileCache = '../tiles/{z}/{x}/{y}.png';
+const tileTemplate = 'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const tileMissing = '../img/missing.png';
 const overviewZoom = 11;
 const mapZoom = 15; // default = 15
 const gridSize = 256;

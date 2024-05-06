@@ -23,7 +23,7 @@
 			</article>
 			<aside>
 
-				<p><a href="#" onclick="localmap.unindicate()">Reset</a> - <a href="./index_tiles.html">Tiles</a></p>
+				<p><a href="#" onclick="localmap.unindicate()">Reset</a> - <a href="./index.html">Bitmap</a></p>
 
 				<!-- Cut below this -->
 				<style>@import url("./css/localmap.css");</style>
@@ -46,9 +46,9 @@
 						'exifUrl': './php/imageexif.php?src={src}',
 						'guideUrl': './data/{key}.json',
 						'routeUrl': './data/{key}.gpx',
-						'mapUrl': './data/{key}.png',
-						//'tilesUrl': './tiles/{z}/{x}/{y}.jpg',
-						//'tilesZoom': 15,
+						//'mapUrl': './data/{key}.png',
+						'tilesUrl': './tiles/{z}/{x}/{y}.png',
+						'tilesZoom': 15,
 						// cache
 						'guideData': GuideData,
 						'routeData': GpxData,

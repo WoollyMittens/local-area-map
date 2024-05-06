@@ -1,5 +1,7 @@
 # localmap.js: Local Map
 
+TODO: update with more advanced version from the sydneyhikingtrips app
+
 Plots GPS data on an interactive offline map of the local area.
 
 Try the [demo](http://www.woollymittens.nl/default.php?url=useful-localmap).
@@ -44,11 +46,11 @@ Or import into an MVC framework.
 
 ```js
 // optional:
-var GuideData = require('cache/guide-data.js');
-var GpxData = require('cache/gpx-data.js');
-var ExifData = require('cache/exif-data.js');
+var GuideData = require('cache/guide-data.js";
+@import {GpxData = require('cache/gpx-data.js";
+@import {ExifData = require('cache/exif-data.js');
 // required:
-var Localmap = require('js/localmap.js');
+var Localmap} from "js/localmap.js";
 ```
 
 ## How to start the script
@@ -137,21 +139,6 @@ localmap.stop();
 ```
 
 End the script gracefully, for re-use of the container.
-
-## How to build the script
-
-This project uses node.js from http://nodejs.org/
-
-This project uses gulp.js from http://gulpjs.com/
-
-The following commands are available for development:
-+ `npm install` - Installs the prerequisites.
-+ `gulp import` - Re-imports libraries from supporting projects to `./src/libs/` if available under the same folder tree.
-+ `gulp dev` - Builds the project for development purposes.
-+ `gulp dist` - Builds the project for deployment purposes.
-+ `gulp watch` - Continuously recompiles updated files during development sessions.
-+ `gulp serve` - Serves the project on a temporary web server at http://localhost:8500/.
-+ `gulp php` - Serves the project on a temporary php server at http://localhost:8500/.
 + `cd node_scripts`
 	+ `node importexif` - Prepares a cache of GPS data of all the photos.
 	+ `node importgpx` - Prepares a cache of GPS data of all routes.
@@ -162,4 +149,4 @@ The following commands are available for development:
 
 ## License
 
-This work is licensed under a [MIT License](https://opensource.org/licenses/MIT). The latest version of this and other scripts by the same author can be found on [Github](https://github.com/WoollyMittens) and at [WoollyMittens.nl](https://www.woollymittens.nl/).
+This work is licensed under a [MIT License](https://opensource.org/licenses/MIT). The latest version of this and other scripts by the same author can be found on [Github](https://github.com/WoollyMittens).
