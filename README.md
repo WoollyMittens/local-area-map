@@ -4,7 +4,9 @@ TODO: update with more advanced version from the sydneyhikingtrips app
 
 Plots GPS data on an interactive offline map of the local area.
 
-Try the [demo](http://www.woollymittens.nl/default.php?url=useful-localmap).
+## Example
+
+https://woollymittens.github.io/local-area-map/
 
 Visit [sydneytrainwalks.com](https://sydneytrainwalks.com/) or [sydneyhikingtrips.com](https://sydneyhikingtrips.com/) for a practical application of this library.
 
