@@ -1,15 +1,18 @@
 {
-	"name": "useful-localmap",
-	"version": "0.0.0",
+	"name": "local-area-map",
+	"version": "0.0.1",
+	"scripts": {
+		"convert_gpx": "cd node_scripts && node convertgpx.mjs && cd ..",
+		"download_tiles": "cd node_scripts && node downloadtiles.mjs && cd ..",
+		"import_exif": "cd node_scripts && node importexif.mjs && cd .."
+	},
 	"devDependencies": {
-		"canvas": "",
-		"del": "",
-		"exif": "",
 		"fs": "",
-		"gm": "",
-		"imagemin-pngquant": "",
 		"jsdom": "",
-		"request": "",
+		"node-fetch": "",
 		"xmldom": ""
+	},
+	"dependencies": {
+		"exif": "^0.6.0"
 	}
 }

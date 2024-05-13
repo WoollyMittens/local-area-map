@@ -1,0 +1,77 @@
+{
+	"location": "Bouddi",
+	"description": "This walk combines the Daleys Point walking track, Bouddi Coastal Walk, and the Flannel Flower walking track into a varied loop.",
+	"keywords": {
+		"Daleys Point walking track": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/daleys-point-walking-track",
+		"Bouddi Coastal Walk": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/bouddi-coastal-walk",
+		"Flannel Flower walking track": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/flannel-flower-walking-track"
+	},
+	"distance": [
+		27,
+		37
+	],
+	"hero": "",
+	"zoom": 13,
+	"rain": false,
+	"fireban": false,
+	"key": "woywoy-bouddi-woywoy",
+	"updated": "2024-01-28",
+	"bounds": {
+		"west": 151.327391,
+		"north": -33.484266,
+		"east": 151.444158,
+		"south": -33.554566
+	},
+	"markers": [
+		{
+			"type": "toilet",
+			"lon": 151.3736,
+			"lat": -33.528491,
+			"description": "Lorem ipsum dolor sit amet."
+		},
+		{
+			"location": "Wagstaff",
+			"type": "ferry",
+			"description": "Plan your return trip from Wagstaffe at <a href=\"https://transportnsw.info/trip#/?from=Wagstaffe Wharf\">transportnsw.info</a>.",
+			"lon": 151.34351,
+			"lat": -33.522901
+		},
+		{
+			"type": "waypoint",
+			"photo": "pxl_20240426_223045396.jpg",
+			"description": "Lorem ipsum dolor sit amet."
+		},
+		{
+			"type": "hotspot",
+			"photo": "pxl_20240426_232316917.jpg",
+			"radius": 0.0004,
+			"lon": 151.3909083,
+			"lat": -33.5227556,
+			"description": "Lorem ipsum dolor sit amet.",
+			"badge": "wizard_2",
+			"title": "Shorefront Realestate",
+			"instruction": "Visit this location to earn the mystery trophy"
+		},
+		{
+			"type": "waypoint",
+			"photo": "pxl_20240427_001152704.jpg",
+			"description": "Lorem ipsum dolor sit amet."
+		},
+		{
+			"type": "waypoint",
+			"photo": "pxl_20240427_005705320.jpg",
+			"description": "Lorem ipsum dolor sit amet."
+		},
+		{
+			"type": "waypoint",
+			"photo": "pxl_20240427_020218661.jpg",
+			"description": "Lorem ipsum dolor sit amet."
+		},
+		{
+			"type": "toilet",
+			"lon": 151.349848,
+			"lat": -33.526041,
+			"description": "Lorem ipsum dolor sit amet."
+		}
+	]
+}
