@@ -10,22 +10,23 @@ export class LocalAreaMapRoute {
 		this.start();
 	}
 
-	start() {
+	async start() {
 		// create a canvas
 		this.element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 		this.element.setAttribute("class", "local-area-map-route");
 		this.container.appendChild(this.element);
-		// use the JSON immediately
-		if (this.config.routeData) {
-			this.onJsonLoaded(this.config.routeData);
-		}
-		// or load the route's GPX first
-		else {
-			// TODO: replace with fetch()
-			var routeXhr = new XMLHttpRequest();
-			routeXhr.addEventListener("load", this.onGpxLoaded.bind(this));
-			routeXhr.open("GET", this.config.routeUrl, true);
-			routeXhr.send();
+		// load the route data
+		const response = await fetch(this.config.routeUrl);
+		const fileType = this.config.routeUrl.split('.').pop();
+		switch(fileType) {
+			case 'gpx': 
+				var xml = await response.text();
+				var dom = (new DOMParser()).parseFromString(xml, 'text/xml');
+				this.onGpxLoaded(dom);
+				break;
+			default:
+				this.config.routeData = await response.json();
+				this.onJsonLoaded(this.config.routeData);
 		}
 	}
 
@@ -102,7 +103,7 @@ export class LocalAreaMapRoute {
 			name = features[a].properties.name;
 			// untangle the coordinates if they are wrapped in an extra array
 			if (features[a].geometry.coordinates[0][0] instanceof Array) { coordinates = [].concat.apply([], features[a].geometry.coordinates); }
-			// otherwise just use the coordinated
+			// otherwise just use the coordinates
 			else { coordinates = features[a].geometry.coordinates; }
 			// add the track
 			this.tracks.push({
@@ -116,7 +117,7 @@ export class LocalAreaMapRoute {
 		this.onComplete();
 	}
 
-	onGpxLoaded(evt) {
+	onGpxLoaded(gpx) {
 		// extracts coordinates from a GPX document
 		function extractCoords(source, destination, parentTag, childTag) {
 			var a, b, c, d, childNodes, name, coords, parentNodes;
@@ -139,8 +140,8 @@ export class LocalAreaMapRoute {
 			}
 		}
 		// extract both kinds of tracks from the GPX into an array of coordinates
-		extractCoords(evt.target.responseXML, this.tracks, "trk", "trkpt");
-		extractCoords(evt.target.responseXML, this.tracks, "rte", "rtept");
+		extractCoords(gpx, this.tracks, "trk", "trkpt");
+		extractCoords(gpx, this.tracks, "rte", "rtept");
 		// redraw
 		this.draw();
 		// resolve completion

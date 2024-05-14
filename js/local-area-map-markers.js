@@ -11,20 +11,11 @@ export class LocalAreaMapMarkers {
 	}
 
 	start() {
-		// if cached data is available
-		if (this.config.guideData) {
-			// add the markers from the guide
-			this.addGuide();
-		}
-		// otherwise
-		else {
-			// load the guide's JSON first
-			// TODO: replace with fetch()
-			var guideXhr = new XMLHttpRequest();
-			guideXhr.addEventListener("load", this.onGuideLoaded.bind(this));
-			guideXhr.open("GET", this.config.guideUrl, true);
-			guideXhr.send();
-		}
+		var guideData = this.config.guideData;
+		// position every marker in the guide
+		guideData.markers.map(this.addMarker.bind(this));
+		// resolve completion
+		this.onComplete();
 	}
 
 	update() {
@@ -43,31 +34,6 @@ export class LocalAreaMapMarkers {
 		for (var key in this.elements) {
 			this.elements[key].style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
 		}
-	}
-
-	addGuide() {
-		var config = this.config;
-		var guideData = this.config.guideData;
-		// store the interpolation limits
-		var min = config.minimum;
-		var max = config.maximum;
-		min.lon = guideData.bounds.west;
-		min.lat = guideData.bounds.north;
-		max.lon = guideData.bounds.east;
-		max.lat = guideData.bounds.south;
-		// store the coverage limits
-		min.lon_cover = guideData.bounds.west;
-		min.lat_cover = guideData.bounds.north;
-		max.lon_cover = guideData.bounds.east;
-		max.lat_cover = guideData.bounds.south;
-		// assume an initial position
-		var pos = config.position;
-		pos.lon = (max.lon_cover - min.lon_cover) / 2 + min.lon_cover;
-		pos.lat = (max.lat_cover - min.lat_cover) / 2 + min.lat_cover;
-		// position every marker in the guide
-		guideData.markers.map(this.addMarker.bind(this));
-		// resolve completion
-		this.onComplete();
 	}
 
 	addMarker(markerData, markerIndex) {
@@ -132,13 +98,5 @@ export class LocalAreaMapMarkers {
 		element.style.top = this.config.distortY((markerData.lat - min.lat_cover) / (max.lat_cover - min.lat_cover)) * 100 + "%";
 		element.style.cursor = markerData.description || markerData.callback ? "pointer" : null;
 		return element;
-	}
-
-	onGuideLoaded(evt) {
-		// decode the guide data
-		this.config.guideData = this.config.guideData || {};
-		this.config.guideData = JSON.parse(evt.target.response);
-		// add the markers from the guide
-		this.addGuide();
 	}
 }

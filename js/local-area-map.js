@@ -3,6 +3,7 @@ import { LocalAreaMapControls } from "./local-area-map-controls.js";
 import { LocalAreaMapScale } from "./local-area-map-scale.js";
 import { LocalAreaMapCredits } from "./local-area-map-credits.js";
 import { LocalAreaMapLegend } from "./local-area-map-legend.js";
+//import { toGeoJSON } from '../lib/togeojson.js';
 
 export class LocalAreaMap {
 	constructor(config) {
@@ -185,15 +186,21 @@ export class LocalAreaMap {
 		if (this.config.legend) this.config.legend.innerHTML = "";
 	}
 
-	start() {
+	async start() {
 		this.config.container.className += " local-area-map-busy";
-		// TODO: async load the assets here
+		// load the guide data
+		const guideResponse = await fetch(this.config.guideUrl);
+		this.config.guideData = await guideResponse.json();
+		// load the exif data
+		const exifResponse = await fetch(this.config.exifUrl);
+		this.config.exifData = await exifResponse.json();
+		// add the components
 		this.components = {
 			canvas: new LocalAreaMapCanvas(this.config, this.onComplete.bind(this), this.indicate.bind(this), this.focus.bind(this)),
 			controls: new LocalAreaMapControls(this.config, this.focus.bind(this)),
 			scale: new LocalAreaMapScale(this.config),
 			credits: new LocalAreaMapCredits(this.config),
-//			legend: new LocalAreaMapLegend(this.config, this.indicate.bind(this), this.unindicate.bind(this)),
+			legend: new LocalAreaMapLegend(this.config, this.indicate.bind(this), this.unindicate.bind(this)),
 		};
 	}
 }

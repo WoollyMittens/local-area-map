@@ -5,10 +5,17 @@
 		<title>Local Area Map</title>
 		<link href="./css/local-area-map.css" rel="stylesheet" />
 		<script src="./js/local-area-map.js" type="module"></script>
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover" />
+		<style>
+			body { font-family:sans-serif; background-color:white; color:black; margin:2rem; }
+			@media(max-width:959px) {
+				body { margin: 0; overflow:hidden; }
+			}
+		</style>
 	</head>
-	<body style="font-family:sans-serif; background-color:white; color:black; padding:2rem;">
+	<body>
 
-		<section style="max-width:32rem; margin:0 auto;">
+		<section class="local-area-map-container">
 
 			<figure class="local-area-map"></figure>
 
@@ -28,26 +35,21 @@
 						'thumbsUrl': './thumbnails/',
 						'photosUrl': './photos/',
 						'markersUrl': './img/marker-{type}.svg',
-						'exifUrl': './php/imageexif.php?src=../../{src}',
+						'exifUrl': './data/exif.json',
 						'guideUrl': './data/guide.json',
 						'routeUrl': './data/route.gpx',
 						'mapUrl': './photos/pxl_20240127_210532650.jpg',
 						//'tilesUrl': './tiles/{z}/{x}/{y}.png',
-						'tilesZoom': 15,
-						/* cache
-						'guideData': guide,
-						'routeData': route,
-						'exifData': exif,
-						*/
+						//'tilesZoom': 15,
 						// templates
 						'introTemplate': document.querySelector('#intro-template').innerHTML,
 						'outroTemplate': document.querySelector('#outro-template').innerHTML,
 						'creditsTemplate': document.querySelector('#credit-template').innerHTML,
 						// events
-						'checkHotspot': () => {},
+						'checkHotspot': () => { return true },
 						'enterHotspot': () => {},
 						'leaveHotspot': () => {},
-						'showPhoto': () => {}
+						'showPhoto': (url, urls) => { console.log('show:', url, 'of:', urls) }
 					});
 
 				});

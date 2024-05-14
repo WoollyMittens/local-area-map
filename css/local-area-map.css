@@ -1,3 +1,20 @@
+.local-area-map-container {
+	max-width: 64rem;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 2rem;
+}
+
+@media(max-width:959px) {
+	.local-area-map-container {
+		grid-template-columns: auto;
+		grid-template-rows: 3fr 2fr;
+		gap: 0;
+		max-height: 100vh;
+	}
+}
+
 .local-area-map {
 	display: block;
 	margin: 0;
@@ -7,9 +24,14 @@
 	position: relative;
 }
 
+.local-area-map * {
+	box-sizing: border-box;
+}
+
 @media (max-width: 959px) {
 	.local-area-map {
 		width: 100%;
+		aspect-ratio: initial;
 	}
 }
 
@@ -269,6 +291,26 @@
 	}
 }
 
+.local-area-map-legend {
+	display: block;
+	aspect-ratio: 1;
+	margin: 0;
+	padding: 0;
+	border: solid 1px #333;
+	position: relative;
+	overflow: auto;
+}
+
+@media (max-width: 959px) {
+	.local-area-map-legend {
+		aspect-ratio: initial;
+	}
+}
+
+.local-area-map-legend * {
+	box-sizing: border-box;
+}
+
 .local-area-map-legend nav {
 	display: flex;
 	align-items: center;
@@ -319,7 +361,7 @@
 
 .local-area-map-legend dl {
 	display: grid;
-	grid-template-columns: 20% auto;
+	grid-template-columns: 9.25rem auto;
 	grid-template-rows: auto;
 	gap: 1.25rem;
 	overflow-x: hidden;
@@ -346,7 +388,7 @@
 	aspect-ratio: 4/3;
 	cursor: pointer;
 	scroll-snap-align: start;
-	margin-left: 1px;
+	margin-left: 1.25rem;
 	position: relative;
 	background-size: cover;
 	background-position: center;

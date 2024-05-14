@@ -14,14 +14,37 @@ export class LocalAreaMapBackground {
 	}
 
 	start() {
+		var config = this.config;
+		var guideData = this.config.guideData;
+		var min = config.minimum;
+		var max = config.maximum;
+		// store the interpolation limits
+		min.lat = min.lat_cover = guideData.bounds.north;
+		max.lon = max.lon_cover = guideData.bounds.east;
+		max.lat = max.lat_cover = guideData.bounds.south;
+		min.lon = min.lon_cover = guideData.bounds.west;
+		// assume an initial position
+		var pos = config.position;
+		pos.lon = (max.lon_cover - min.lon_cover) / 2 + min.lon_cover;
+		pos.lat = (max.lat_cover - min.lat_cover) / 2 + min.lat_cover;
 		// create the canvas
 		this.element = document.createElement("div");
 		this.element.setAttribute("class", "local-area-map-background");
 		this.container.appendChild(this.element);
 		// load the tiles if available
-		if (this.config.tilesUrl) this.loadTiles();
+		if (this.config.tilesUrl) {
+			// align the bounds to the tile grid
+			min.lat_cover = tile2lat(lat2tile(min.lat_cover, 15) - 1, 15);
+			max.lon_cover = tile2long(long2tile(max.lon_cover, 15) + 1, 15);
+			max.lat_cover = tile2lat(lat2tile(max.lat_cover, 15) + 1, 15);
+			min.lon_cover = tile2long(long2tile(min.lon_cover, 15) - 1, 15);
+			// load the tiles
+			this.loadTiles();
+		}
 		// load the map image if available
-		if (this.config.mapUrl) this.loadBitmap();
+		if (this.config.mapUrl) {
+			this.loadBitmap();
+		}
 		// catch window resizes
 		window.addEventListener("resize", this.redraw.bind(this));
 	}
@@ -46,7 +69,6 @@ export class LocalAreaMapBackground {
 	}
 
 	drawBitmap() {
-		var container = this.config.container;
 		var element = this.element;
 		var image = this.image;
 		var min = this.config.minimum;
@@ -58,8 +80,6 @@ export class LocalAreaMapBackground {
 		var offsetHeight = (min.lat - min.lat_cover) * pixelsPerLat;
 		var croppedWidth = (max.lon_cover - min.lon_cover) * pixelsPerLon;
 		var croppedHeight = (max.lat_cover - min.lat_cover) * pixelsPerLat;
-		var displayWidth = croppedWidth / 2;
-		var displayHeight = croppedHeight / 2;
 		// set the size of the canvas to the bitmap
 		element.style.width = croppedWidth + "px";
 		element.style.height = croppedHeight + "px";
@@ -75,6 +95,7 @@ export class LocalAreaMapBackground {
 	}
 
 	measureTiles() {
+		// TODO: add offset for the ad hoc boundaries
 		var min = this.config.minimum;
 		var max = this.config.maximum;
 		var pos = this.config.position;
@@ -92,14 +113,8 @@ export class LocalAreaMapBackground {
 		var posX = long2tile(pos.lon, this.config.tilesZoom);
 		var posY = lat2tile(pos.lat, this.config.tilesZoom);
 		// return the values
-		return {
-			minX: minX,
-			minY: minY,
-			maxX: maxX,
-			maxY: maxY,
-			posX: posX,
-			posY: posY,
-		};
+		console.log({ minX, minY, maxX, maxY, posX, posY });
+		return { minX, minY, maxX, maxY, posX, posY };
 	}
 
 	scoreMarkers() {
@@ -131,7 +146,6 @@ export class LocalAreaMapBackground {
 	}
 
 	loadTiles() {
-		var container = this.config.container;
 		var element = this.element;
 		var coords = this.measureTiles();
 		// calculate the size of the grid

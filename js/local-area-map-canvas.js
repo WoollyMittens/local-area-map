@@ -31,7 +31,7 @@ export class LocalAreaMapCanvas {
 		this.components.indicator = new LocalAreaMapIndicator(this.config, this.element, this.onMarkerClicked, this.onMapFocus);
 		this.components.location = new LocalAreaMapLocation(this.config, this.element);
 		// start adding components in turn
-		this.addMarkers();
+		this.addBackground();
 	}
 
 	update() {
@@ -63,14 +63,14 @@ export class LocalAreaMapCanvas {
 		element.style.transform = "translate3d(" + offsetX + "px, " + offsetY + "px, 0px) scale3d(" + zoom + ", " + zoom + ",1)";
 	}
 
-	addMarkers() {
-		// add the markers to the canvas
-		this.components.markers = new LocalAreaMapMarkers(this.config, this.element, this.onMarkerClicked, this.addBackground.bind(this));
-	}
-
 	addBackground() {
 		// add the background to the canvas
-		this.components.background = new LocalAreaMapBackground(this.config, this.element, this.addRoute.bind(this));
+		this.components.background = new LocalAreaMapBackground(this.config, this.element, this.addMarkers.bind(this));
+	}
+
+	addMarkers() {
+		// add the markers to the canvas
+		this.components.markers = new LocalAreaMapMarkers(this.config, this.element, this.onMarkerClicked, this.addRoute.bind(this));
 	}
 
 	addRoute() {

@@ -7,13 +7,10 @@
 		"Flannel Flower walking track": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/flannel-flower-walking-track"
 	},
 	"distance": [
-		27,
-		37
+		10,
+		20
 	],
-	"hero": "",
 	"zoom": 13,
-	"rain": false,
-	"fireban": false,
 	"key": "woywoy-bouddi-woywoy",
 	"updated": "2024-01-28",
 	"bounds": {
@@ -24,21 +21,17 @@
 	},
 	"markers": [
 		{
-			"type": "toilet",
-			"lon": 151.3736,
-			"lat": -33.528491,
-			"description": "Lorem ipsum dolor sit amet."
-		},
-		{
-			"location": "Wagstaff",
 			"type": "ferry",
-			"description": "Plan your return trip from Wagstaffe at <a href=\"https://transportnsw.info/trip#/?from=Wagstaffe Wharf\">transportnsw.info</a>.",
+			"location": "Wagstaff",
+			"description": "Plan your trip to Wagstaffe at <a href=\"https://transportnsw.info/trip#/?to=Wagstaffe Wharf\">transportnsw.info</a>.",
 			"lon": 151.34351,
 			"lat": -33.522901
 		},
 		{
 			"type": "waypoint",
 			"photo": "pxl_20240426_223045396.jpg",
+			"lon": 151.363925,
+			"lat": -33.50922700006975,
 			"description": "Lorem ipsum dolor sit amet."
 		},
 		{
@@ -55,16 +48,28 @@
 		{
 			"type": "waypoint",
 			"photo": "pxl_20240427_001152704.jpg",
+			"lon": 151.375155,
+			"lat": -33.529942,
 			"description": "Lorem ipsum dolor sit amet."
 		},
 		{
 			"type": "waypoint",
 			"photo": "pxl_20240427_005705320.jpg",
+			"lon": 151.36185899999998,
+			"lat": -33.523373,
 			"description": "Lorem ipsum dolor sit amet."
 		},
 		{
 			"type": "waypoint",
 			"photo": "pxl_20240427_020218661.jpg",
+			"lon": 151.357044,
+			"lat": -33.509608,
+			"description": "Lorem ipsum dolor sit amet."
+		},
+		{
+			"type": "toilet",
+			"lon": 151.3736,
+			"lat": -33.528491,
 			"description": "Lorem ipsum dolor sit amet."
 		},
 		{

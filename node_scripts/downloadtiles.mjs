@@ -7,7 +7,6 @@ const tileLocal = '../tiles/{z}/{x}/{y}.png';
 const tileRemote = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const tileMissing = '../inc/img/missing.png';
 const guidePath = '../data/guide.json';
-const overviewZoom = 11;
 const mapZoom = 15;
 
 // check if a file exists
@@ -50,10 +49,10 @@ function generateQueue(guideData) {
   // get the file list
   const queue = [];
   // convert the bounds to tiles
-  let minX = long2tile(guideData.bounds.west, mapZoom);
-  let minY = lat2tile(guideData.bounds.north, mapZoom);
-  let maxX = long2tile(guideData.bounds.east, mapZoom);
-  let maxY = lat2tile(guideData.bounds.south, mapZoom);
+  let minY = lat2tile(guideData.bounds.north, mapZoom) - 1;
+  let maxX = long2tile(guideData.bounds.east, mapZoom) + 1;
+  let maxY = lat2tile(guideData.bounds.south, mapZoom) + 1;
+  let minX = long2tile(guideData.bounds.west, mapZoom) - 1;
   // create a list of tiles within the map bounds
   for (let x = minX; x <= maxX; x += 1) {
     for (let y = minY; y <= maxY; y += 1) {

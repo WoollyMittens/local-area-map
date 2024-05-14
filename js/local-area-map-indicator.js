@@ -34,28 +34,10 @@ export class LocalAreaMapIndicator {
 		// don't continue without marker data
 		if (!markerData) return;
 		// populate the indicator's model
+		console.log('markerData', markerData);
 		this.config.indicator = markerData;
-		// if the coordinates are known
-		if (this.config.indicator.lon && this.config.indicator.lat) {
-			// display the indicator immediately
-			this.onIndicateSuccess(instant);
-		}
-		// else try the cached EXIF data
-		else if (this.config?.exifData[markerData.photo]) {
-			// display the indicator after getting the coordinates from the cache
-			const cached = this.config.exifData[markerData.photo];
-			this.config.indicator.lon = cached.lon;
-			this.config.indicator.lat = cached.lat;
-			this.onIndicateSuccess(instant);
-		}
-		// or try to retrieve them from the photo
-		else {
-			// TODO: replace with fetch()
-			var guideXhr = new XMLHttpRequest();
-			guideXhr.addEventListener("load", this.onExifLoaded.bind(this));
-			guideXhr.open("GET", this.config.exifUrl.replace("{src}", markerData.photo), true);
-			guideXhr.send();
-		}
+		// display the indicator
+		this.onIndicateSuccess(instant);
 	}
 
 	reset() {
@@ -109,36 +91,6 @@ export class LocalAreaMapIndicator {
 			this.lon = null;
 			this.lat = null;
 			this.element.style.display = "none";
-		}
-	}
-
-	onExifLoaded(result) {
-		try {
-			var exif = JSON.parse(result.target.response);
-			var deg,
-				min,
-				sec,
-				ref,
-				coords = {};
-			// if the exif data contains GPS information
-			if (exif && exif.GPS) {
-				// convert the lon into a usable format
-				deg = parseInt(exif.GPS.GPSLongitude[0]);
-				min = parseInt(exif.GPS.GPSLongitude[1]);
-				sec = parseInt(exif.GPS.GPSLongitude[2]) / 100;
-				ref = exif.GPS.GPSLongitudeRef;
-				this.config.indicator.lon = (deg + min / 60 + sec / 3600) * (ref === "W" ? -1 : 1);
-				// convert the lat into a usable format
-				deg = parseInt(exif.GPS.GPSLatitude[0]);
-				min = parseInt(exif.GPS.GPSLatitude[1]);
-				sec = parseInt(exif.GPS.GPSLatitude[2]) / 100;
-				ref = exif.GPS.GPSLatitudeRef;
-				this.config.indicator.lat = (deg + min / 60 + sec / 3600) * (ref === "N" ? 1 : -1);
-				// return the result
-				this.onIndicateSuccess(false);
-			}
-		} catch (e) {
-			console.log(e);
 		}
 	}
 

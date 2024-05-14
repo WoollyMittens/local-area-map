@@ -1,7 +1,5 @@
 # localmap.js: Local Map
 
-TODO: update with more advanced version from the sydneyhikingtrips app
-
 Plots GPS data on an interactive offline map of the local area.
 
 ## Example
@@ -12,77 +10,178 @@ Visit [sydneytrainwalks.com](https://sydneytrainwalks.com/) or [sydneyhikingtrip
 
 ## How to include the script
 
-The stylesheet is best included in the header of the document.
+The includes can be added to the HTML document:
 
 ```html
-<link rel="stylesheet" href="css/localmap.css"/>
+<link rel="stylesheet" href="css/local-area-map.css"/>
+<script src="js/local-area-map.js" type="module"></script>
 ```
 
-This include can be added to the header or placed inline before the script is invoked.
-
-```html
-<!-- optional: --->
-<script src="cache/guide-data.js"></script>
-<script src="cache/exif-data.js"></script>
-<script src="cache/gpx-data.js"></script>
-<!-- required: -->
-<script src="js/localmap.js"></script>
-```
-
-Or use [Require.js](https://requirejs.org/).
+Or as a [Javascript module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules):
 
 ```js
-requirejs([
-	// required:
-	"js/localmap.js",
-	// optional:
-	"cache/guide-data.js",
-	"cache/exif-data.js",
-	"cache/gpx-data.js"
-], function(Localmap, GuideData, ExifData, GpxData) {
-	...
-});
+import { LocalAreaMap } from "js/local-area-map.js";
 ```
 
-Or import into an MVC framework.
+## How to populate the data
 
-```js
-// optional:
-var GuideData = require('cache/guide-data.js";
-@import {GpxData = require('cache/gpx-data.js";
-@import {ExifData = require('cache/exif-data.js');
-// required:
-var Localmap} from "js/localmap.js";
+### Editing the guide
+
+
+Edit ```guide.json``` to modify the details and add waypoints to the map.
+
+```javascript
+{
+  ...
+  "description": "This walk combines the Daleys Point walking track, Bouddi Coastal Walk, and the Flannel Flower walking track into a varied loop.",
+  "keywords": {
+    "Daleys Point walking track": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/daleys-point-walking-track",
+    "Bouddi Coastal Walk": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/bouddi-coastal-walk",
+    "Flannel Flower walking track": "https://www.nationalparks.nsw.gov.au/things-to-do/walking-tracks/flannel-flower-walking-track"
+  },
+  "distance": [
+    10,
+    20
+  ],
+  ...
+}
+```
+
+Above section is used to populate the header of the legend. The keywords are linked automatically.
+
+```javascript
+{
+  ...
+  "key": "woywoy-bouddi-woywoy",
+  ...
+}
+```
+
+The key is used to uniquely identify the state of this map for local storage.
+
+```javascript
+{
+  ...
+  "bounds": {
+    "west": 151.327391,
+    "north": -33.484266,
+    "east": 151.444158,
+    "south": -33.554566
+  },
+  ...
+}
+```
+
+These coordinates determine the boundary of the map. When a scanned map is used, fill in its coverage area precisely.
+
+```javascript
+{
+  ...
+  {
+    "type": "ferry",
+    "photo": "pxl_20240426_223045396.jpg",
+    "location": "Wagstaff",
+    "description": "Plan your trip to Wagstaffe at <a href=\"https://transportnsw.info/trip#/?to=Wagstaffe Wharf\">transportnsw.info</a>.",
+    "lon": 151.34351,
+    "lat": -33.522901
+  },
+  ...
+}
+```
+
+This example would show a specific icon on the map. The following are supported: bus, ferry, train, tram, hotel, info, kiosk, landmark, photo, tent, toilet, walk, warning.
+
+If a photo is not provided, a fallback image will be used in the legend.
+
+```javascript
+{
+  ...
+  {
+    "type": "waypoint",
+    "photo": "pxl_20240426_223045396.jpg",
+    "lon": 151.363925,
+    "lat": -33.50922700006975,
+    "description": "Lorem ipsum dolor sit amet."
+  },
+  ...
+}
+```
+
+Above example shows a waypoint dot on the map, which is coupled to photographic entry in the legend.
+
+```javascript
+{
+  ...
+  {
+    "type": "hotspot",
+    "photo": "pxl_20240426_232316917.jpg",
+    "radius": 0.0004,
+    "lon": 151.3909083,
+    "lat": -33.5227556,
+    "description": "Lorem ipsum dolor sit amet.",
+    "badge": "wizard_2",
+    "title": "Shorefront Realestate",
+    "instruction": "Visit this location to earn the mystery trophy"
+  },
+  ...
+}
+```
+
+A hot spot has a radius within which the ```enterHotspot``` handler is triggered.
+
+It will display the ```instruction``` instead of the ```description``` if the ```checkHotspot``` handler has been answered with ```return true```.
+
+### Downloading map tiles
+
+The following node script will download the OpenStreetMap tiles that fit inside the bounds of the map and cache them in the ```tiles``` folder.
+
+```powershell
+npm run download_tiles
+```
+
+### Import photographic geolocation data
+
+The following node script will import the geolocation (EXIF) data from the contents of the ```photos``` folder.
+
+```powershell
+npm run import_exif
 ```
 
 ## How to start the script
 
 ```javascript
-var localmap = new Localmap({
-	'key': 'tarongazoo-sydneyharbour-balmoralbeach',
-	//'key': 'milsonspoint-sydneyharbour-manly',
-	'container': document.querySelector('.localmap'),
-	'legend': document.querySelector('.localmap-legend'),
-	// assets
-	'thumbsUrl': './thumbnails/{key}/',
-	'photosUrl': './photos/{key}/',
-	'markersUrl': './img/marker-{type}.svg',
-	'exifUrl': './php/imageexif.php?src={src}',
-	'guideUrl': './data/{key}.json',
-	'routeUrl': './data/{key}.gpx',
-	'mapUrl': './data/{key}.png',
-	//'tilesUrl': './tiles/{z}/{x}/{y}.png',
-	//'tilesZoom': 15,
-	// cache
-	'guideData': GuideData,
-	'routeData': GpxData,
-	'exifData': ExifData,
-	// attribution
-	'creditsTemplate': 'Maps &copy; <a href="http://www.4umaps.eu/mountain-bike-hiking-bicycle-outdoor-topographic-map.htm" target="_blank">4UMaps</a>, Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> and contributors, CC BY-SA'
+const localAreaMap = new LocalAreaMap({
+  // options
+  'showFirst': true,
+  'mobileSize': "(max-width: 959px)",
+  // containers
+  'container': document.querySelector('.local-area-map'),
+  'legend': document.querySelector('.local-area-map-legend'),
+  // assets
+  'thumbsUrl': './thumbnails/',
+  'photosUrl': './photos/',
+  'markersUrl': './img/marker-{type}.svg',
+  'exifUrl': './data/exif.json',
+  'guideUrl': './data/guide.json',
+  'routeUrl': './data/route.gpx',
+  'mapUrl': './photos/pxl_20240127_210532650.jpg',
+  //'tilesUrl': './tiles/{z}/{x}/{y}.png',
+  //'tilesZoom': 15,
+  // templates
+  'introTemplate': document.querySelector('#intro-template').innerHTML,
+  'outroTemplate': document.querySelector('#outro-template').innerHTML,
+  'creditsTemplate': document.querySelector('#credit-template').innerHTML,
+  // events
+  'checkHotspot': (marker) => { return true; },
+  'enterHotspot': (marker) => {},
+  'leaveHotspot': (marker) => {},
+  'showPhoto': (url, urls) => {}
 });
 ```
 
-**key : {String}** - A common file name pattern for all assets.
+**showFirst : {Boolean}** - 
+
+**mobileSize : {String}** - A media query below which the mobile version should be used.
 
 **container : {DOM node}** - The HTML DOM element that will contain the map.
 
@@ -94,7 +193,7 @@ var localmap = new Localmap({
 
 **markersUrl : {String}** - Template for the path to the marker images.
 
-**exifUrl : {String}** - Path a webservice that extracts geolocation data from photos.
+**exifUrl : {String}** - Path to a lookup table for the geolocation data of photos.(1)
 
 **guideUrl : {String}** - Path to the JSON guide to display.
 
@@ -106,30 +205,47 @@ var localmap = new Localmap({
 
 **tilesZoom : {String}** - The OpenStreetMap zoom level of the map tiles.
 
-**guideData : {String}** - An optional cache of guides.
+**introTemplate : {DOM node}** - Template for the header above the legend.
 
-**routeData : {String}** - An optional cache of GPS routes.
+**outroTemplate : {DOM node}** - Template footer below the legend.
 
-**exifData : {String}** - An optional cache of geolocation data.
+**creditsTemplate : {DOM node}** - Template for the map's copyright notice.
 
-**creditsTemplate : {String}** - Template for the map's copyright notice.
+**checkHotspot : {Function}** - A handler to verify whether a trophy should be shown.
+
+**enterHotspot : {Function}** - A handler for when the device enters the area around a hotspot.
+
+**leaveHotspot : {Function}** - A handler for when the device exists the area around a hotspot.
+
+**showPhoto : {Function}** - A handler for when a thumbnail is clicked.
 
 ## How to control the script
 
 ### Indicate
 
 ```javascript
-localmap.indicate(element);
+localmap.indicate({
+  lon: ...,
+  lat: ...,
+  zoom: ...,
+  referrer: ...,
+});
 ```
 
 Highlights and centres a specific location.
 
-**element : {DOM node}** - Reference to a link or image for which EXIF geolocation data is available.
+**lon : {String}** - The longitude to be indicated.
+
+**lat : {String}** - The latitude to be indicated.
+
+**zoom : {Integer}** - Zoom in on the indicated location to the given OpenStreetMap zoom level (i.e 13-16).
+
+**referrer : {DOM Element}** - This DOM element will get the "data-active" attribute while the map is focused on the related location.
 
 ### Unindicate
 
 ```javascript
-localmap.unindicate(element);
+localmap.unindicate();
 ```
 
 Reset the map after "indicate" was used.
@@ -139,15 +255,6 @@ Reset the map after "indicate" was used.
 ```javascript
 localmap.stop();
 ```
-
-End the script gracefully, for re-use of the container.
-+ `cd node_scripts`
-	+ `node importexif` - Prepares a cache of GPS data of all the photos.
-	+ `node importgpx` - Prepares a cache of GPS data of all routes.
-	+ `node importguides` - Prepares a cache of JSON data for all the guides.
-	+ `node importphotos` - Creates thumbnails from the photos.
-	+ `node importtiles` - Downloads the required map tiles from an OpenStreetMap server".
-	+ `node converttiles` - Converts the map tiles to JPG.
 
 ## License
 
