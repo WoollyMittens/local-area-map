@@ -57,7 +57,7 @@ Above section is used to populate the header of the legend. The keywords are lin
 }
 ```
 
-The key is used to uniquely identify the state of this map for local storage.
+This unique key is used to store the state of this map in local storage.
 
 ```javascript
 {
