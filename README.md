@@ -238,7 +238,7 @@ Highlights and centres a specific location.
 
 **lat : {String}** - The latitude to be indicated.
 
-**zoom : {Integer}** - Zoom in on the indicated location to the given OpenStreetMap zoom level (i.e 13-16).
+**zoom : {Integer}** - Zoom in on the indicated location to the given OpenStreetMap zoom level (i.e 15-18).
 
 **referrer : {DOM Element}** - This DOM element will get the "data-active" attribute while the map is focused on the related location.
 
