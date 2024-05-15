@@ -152,7 +152,6 @@ npm run import_exif
 ```javascript
 const localAreaMap = new LocalAreaMap({
   // options
-  'showFirst': true,
   'mobileSize': "(max-width: 959px)",
   // containers
   'container': document.querySelector('.local-area-map'),
@@ -178,8 +177,6 @@ const localAreaMap = new LocalAreaMap({
   'showPhoto': (url, urls) => {}
 });
 ```
-
-**showFirst : {Boolean}** - 
 
 **mobileSize : {String}** - A media query below which the mobile version should be used.
 

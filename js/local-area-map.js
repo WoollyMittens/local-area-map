@@ -27,7 +27,6 @@ export class LocalAreaMap {
 			introTemplate: null,
 			outroTemplate: null,
 			creditsTemplate: null,
-			showFirst: null,
 			useTransitions: null,
 			minimum: {
 				lon: null,
