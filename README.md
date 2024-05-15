@@ -174,7 +174,8 @@ const localAreaMap = new LocalAreaMap({
   'checkHotspot': (marker) => { return true; },
   'enterHotspot': (marker) => {},
   'leaveHotspot': (marker) => {},
-  'showPhoto': (url, urls) => {}
+  'showPhoto': (url, urls) => {},
+  'supportColour': (name) => {}
 });
 ```
 
@@ -215,6 +216,8 @@ const localAreaMap = new LocalAreaMap({
 **leaveHotspot : {Function}** - A handler for when the device exists the area around a hotspot.
 
 **showPhoto : {Function}** - A handler for when a thumbnail is clicked.
+
+**supportColour : {Function}** - A handler to assign legend colours to named markers.
 
 ## How to control the script
 
