@@ -16,18 +16,36 @@ export class LocalAreaMapRoute {
 		this.element.setAttribute("class", "local-area-map-route");
 		this.container.appendChild(this.element);
 		// load the route data
-		const response = await fetch(this.config.routeUrl);
-		const fileType = this.config.routeUrl.split('.').pop();
+		let fileType;
+		const source = this.config.routeUrl;
+		if (source instanceof Node) { fileType = 'dom' }
+		else if (typeof source === 'string') {  fileType = source.split('.').pop() }
 		switch(fileType) {
-			case 'gpx': 
-				var xml = await response.text();
-				var dom = (new DOMParser()).parseFromString(xml, 'text/xml');
-				this.onGpxLoaded(dom);
-				break;
-			default:
-				this.config.routeData = await response.json();
-				this.onJsonLoaded(this.config.routeData);
+			// load as XML
+			case 'gpx': this.loadAsGpx(source); break;
+			// load as JSON
+			case 'json': this.loadAsJson(source); break;
+			// handle preloaded XML
+			case 'dom': this.onGpxLoaded(source); break;
+			// handle preloaded JSON
+			default: this.onJsonLoaded(source);
 		}
+	}
+
+	async loadAsGpx(url) {
+		// otherwise fetch and decode the data as a file
+		const response = await fetch(url);
+		const xml = await response.text();
+		const dom = (new DOMParser()).parseFromString(xml, 'text/xml');
+		console.log(typeof dom, dom instanceof Node);
+		this.onGpxLoaded(dom);
+	}
+
+	async loadAsJson(url) {
+		// otherwise fetch and decode the data as a file
+		response = await fetch(url);
+		var json = await response.json();
+		this.onJsonLoaded(json);
 	}
 
 	update() {

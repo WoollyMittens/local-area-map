@@ -185,14 +185,21 @@ export class LocalAreaMap {
 		if (this.config.legend) this.config.legend.innerHTML = "";
 	}
 
+	async loadAssetData(source) {
+		// if the source is not a filename, assume the data has already been loaded
+		if (typeof source !== 'string') return source;
+		// otherwise fetch and decode the data as a file
+		const guideResponse = await fetch(source);
+		const data = await guideResponse.json();
+		return data;
+	}
+
 	async start() {
 		this.config.container.className += " local-area-map-busy";
 		// load the guide data
-		const guideResponse = await fetch(this.config.guideUrl);
-		this.config.guideData = await guideResponse.json();
+		this.config.guideData = await this.loadAssetData(this.config.guideUrl);
 		// load the exif data
-		const exifResponse = await fetch(this.config.exifUrl);
-		this.config.exifData = await exifResponse.json();
+		this.config.exifData = await this.loadAssetData(this.config.exifUrl);
 		// add the components
 		this.components = {
 			canvas: new LocalAreaMapCanvas(this.config, this.onComplete.bind(this), this.indicate.bind(this), this.focus.bind(this)),

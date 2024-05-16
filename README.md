@@ -195,7 +195,7 @@ const localAreaMap = new LocalAreaMap({
 
 **guideUrl : {String}** - Path to the JSON guide to display.
 
-**routeUrl : {String}** - Path to the GPX route to display.
+**routeUrl : {String}** - Path to the GPX or GeoJSON route to display.
 
 **mapUrl : {String}** - Optionally a path to the single image background to use INSTEAD of OpenStreetMap map tiles.
 
