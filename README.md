@@ -209,15 +209,15 @@ const localAreaMap = new LocalAreaMap({
 
 **creditsTemplate : {DOM node}** - Template for the map's copyright notice.
 
-**checkHotspot : {Function}** - A handler to verify whether a trophy should be shown.
+**checkHotspot : {Function}** - Optionally a  handler to verify whether a trophy should be shown.
 
-**enterHotspot : {Function}** - A handler for when the device enters the area around a hotspot.
+**enterHotspot : {Function}** - Optionally a  handler for when the device enters the area around a hotspot.
 
-**leaveHotspot : {Function}** - A handler for when the device exists the area around a hotspot.
+**leaveHotspot : {Function}** - Optionally a  handler for when the device exists the area around a hotspot.
 
-**showPhoto : {Function}** - A handler for when a thumbnail is clicked.
+**showPhoto : {Function}** - Optionally a  handler for when a thumbnail is clicked.
 
-**supportColour : {Function}** - A handler to assign legend colours to named markers.
+**supportColour : {Function}** - Optionally a handler to assign legend colours to named markers.
 
 ## How to control the script
 
