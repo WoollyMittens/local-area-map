@@ -31,15 +31,11 @@ export class LocalAreaMap {
 			minimum: {
 				lon: null,
 				lat: null,
-				lon_cover: null,
-				lat_cover: null,
 				zoom: null,
 			},
 			maximum: {
 				lon: null,
 				lat: null,
-				lon_cover: null,
-				lat_cover: null,
 				zoom: null,
 			},
 			position: {
@@ -100,12 +96,12 @@ export class LocalAreaMap {
 		// try to keep the focus within bounds
 		this.config.useTransitions = smoothly;
 		this.config.position.lon = Math.max(
-			Math.min(lon, this.config.maximum.lon_cover),
-			this.config.minimum.lon_cover
+			Math.min(lon, this.config.maximum.lon),
+			this.config.minimum.lon
 		);
 		this.config.position.lat = Math.min(
-			Math.max(lat, this.config.maximum.lat_cover),
-			this.config.minimum.lat_cover
+			Math.max(lat, this.config.maximum.lat),
+			this.config.minimum.lat
 		);
 		this.config.position.zoom = Math.max(Math.min(zoom, this.config.maximum.zoom), this.config.minimum.zoom);
 		this.update();
@@ -173,8 +169,8 @@ export class LocalAreaMap {
 		var max = this.config.maximum;
 		var min = this.config.minimum;
 		this.restore(
-			(max.lon_cover - min.lon_cover) / 2 + min.lon_cover,
-			(max.lat_cover - min.lat_cover) / 2 + min.lat_cover,
+			(max.lon - min.lon) / 2 + min.lon,
+			(max.lat - min.lat) / 2 + min.lat,
 			min.zoom * 1.25
 		);
 	}

@@ -65,8 +65,8 @@ export class LocalAreaMapMarkers {
 		element.setAttribute("class", "local-area-map-waypoint local-area-map-index-" + markerIndex);
 		element.addEventListener("click", this.onClicked.bind(this, markerData, false));
 		element.style.borderColor = this.config.supportColour(id);
-		element.style.left = this.config.distortX((markerData.lon - min.lon_cover) / (max.lon_cover - min.lon_cover)) * 100 + "%";
-		element.style.top = this.config.distortY((markerData.lat - min.lat_cover) / (max.lat_cover - min.lat_cover)) * 100 + "%";
+		element.style.left = this.config.distortX((markerData.lon - min.lon) / (max.lon - min.lon)) * 100 + "%";
+		element.style.top = this.config.distortY((markerData.lat - min.lat) / (max.lat - min.lat)) * 100 + "%";
 		element.style.cursor = "pointer";
 		return element;
 	}
@@ -94,8 +94,8 @@ export class LocalAreaMapMarkers {
 		element.setAttribute("class", "local-area-map-marker local-area-map-index-" + markerIndex);
 		element.setAttribute("data-key", id);
 		element.addEventListener("click", this.onClicked.bind(this, markerData));
-		element.style.left = this.config.distortX((markerData.lon - min.lon_cover) / (max.lon_cover - min.lon_cover)) * 100 + "%";
-		element.style.top = this.config.distortY((markerData.lat - min.lat_cover) / (max.lat_cover - min.lat_cover)) * 100 + "%";
+		element.style.left = this.config.distortX((markerData.lon - min.lon) / (max.lon - min.lon)) * 100 + "%";
+		element.style.top = this.config.distortY((markerData.lat - min.lat) / (max.lat - min.lat)) * 100 + "%";
 		element.style.cursor = markerData.description || markerData.callback ? "pointer" : null;
 		return element;
 	}

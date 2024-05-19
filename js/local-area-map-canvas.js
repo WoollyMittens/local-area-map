@@ -30,7 +30,7 @@ export class LocalAreaMapCanvas {
 		// add the indicator and location components
 		this.components.indicator = new LocalAreaMapIndicator(this.config, this.element, this.onMarkerClicked, this.onMapFocus);
 		this.components.location = new LocalAreaMapLocation(this.config, this.element);
-		// start adding components in turn
+		// add the background / tiles
 		this.addBackground();
 	}
 
@@ -48,8 +48,8 @@ export class LocalAreaMapCanvas {
 		var max = this.config.maximum;
 		var pos = this.config.position;
 		// convert the lon,lat to x,y
-		var centerX = ((pos.lon - min.lon_cover) / (max.lon_cover - min.lon_cover)) * element.offsetWidth;
-		var centerY = ((pos.lat - min.lat_cover) / (max.lat_cover - min.lat_cover)) * element.offsetHeight;
+		var centerX = ((pos.lon - min.lon) / (max.lon - min.lon)) * element.offsetWidth;
+		var centerY = ((pos.lat - min.lat) / (max.lat - min.lat)) * element.offsetHeight;
 		// limit the zoom
 		var zoom = Math.max(Math.min(pos.zoom, max.zoom), min.zoom);
 		// convert the center into an offset

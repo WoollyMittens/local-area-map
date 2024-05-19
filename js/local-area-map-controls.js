@@ -85,8 +85,8 @@ export class LocalAreaMapControls {
 		this.inertia.y = 0;
 		this.inertia.z = 0;
 		// update the interpolation interval
-		this.range.lon = this.config.maximum.lon_cover - this.config.minimum.lon_cover;
-		this.range.lat = this.config.maximum.lat_cover - this.config.minimum.lat_cover;
+		this.range.lon = this.config.maximum.lon - this.config.minimum.lon;
+		this.range.lat = this.config.maximum.lat - this.config.minimum.lat;
 		this.range.zoom = this.config.maximum.zoom - this.config.minimum.zoom;
 		this.range.x = this.config.canvasElement.offsetWidth * this.config.position.zoom;
 		this.range.y = this.config.canvasElement.offsetHeight * this.config.position.zoom;
@@ -141,8 +141,8 @@ export class LocalAreaMapControls {
 
 	wheelInteraction(method, evt) {
 		// update the range
-		this.range.lon = this.config.maximum.lon_cover - this.config.minimum.lon_cover;
-		this.range.lat = this.config.maximum.lat_cover - this.config.minimum.lat_cover;
+		this.range.lon = this.config.maximum.lon - this.config.minimum.lon;
+		this.range.lat = this.config.maximum.lat - this.config.minimum.lat;
 		this.range.zoom = this.config.maximum.zoom - this.config.minimum.zoom;
 		// update the inertia
 		this.inertia.z += evt.deltaY > 0 ? this.steps.z : -this.steps.z;

@@ -89,8 +89,8 @@ export class LocalAreaMapRoute {
 			points = "";
 			for (var c = 0, d = track.coordinates.length; c < d; c += increments) {
 				// calculate the current step
-				x = parseInt(this.config.distortX((track.coordinates[c][0] - min.lon_cover) / (max.lon_cover - min.lon_cover)) * w);
-				y = parseInt(this.config.distortY((track.coordinates[c][1] - min.lat_cover) / (max.lat_cover - min.lat_cover)) * h);
+				x = parseInt(this.config.distortX((track.coordinates[c][0] - min.lon) / (max.lon - min.lon)) * w);
+				y = parseInt(this.config.distortY((track.coordinates[c][1] - min.lat) / (max.lat - min.lat)) * h);
 				// add the step
 				points += " " + x + "," + y;
 			}

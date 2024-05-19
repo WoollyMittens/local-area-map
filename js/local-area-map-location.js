@@ -92,11 +92,11 @@ export class LocalAreaMapLocation {
 		var lon = position.coords.longitude;
 		var lat = position.coords.latitude;
 		// if the location is within bounds
-		if (lon > min.lon_cover && lon < max.lon_cover && lat < min.lat_cover && lat > max.lat_cover) {
+		if (lon > min.lon && lon < max.lon && lat < min.lat && lat > max.lat) {
 			// display the marker
 			this.element.style.display = "block";
-			this.element.style.left = this.config.distortX((lon - min.lon_cover) / (max.lon_cover - min.lon_cover)) * 100 + "%";
-			this.element.style.top = this.config.distortY((lat - min.lat_cover) / (max.lat_cover - min.lat_cover)) * 100 + "%";
+			this.element.style.left = this.config.distortX((lon - min.lon) / (max.lon - min.lon)) * 100 + "%";
+			this.element.style.top = this.config.distortY((lat - min.lat) / (max.lat - min.lat)) * 100 + "%";
 			// check if the location is within a hotspot
 			this.checkHotSpot(lon, lat);
 			// otherwise

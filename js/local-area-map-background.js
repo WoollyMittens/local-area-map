@@ -19,32 +19,22 @@ export class LocalAreaMapBackground {
 		var min = config.minimum;
 		var max = config.maximum;
 		// store the interpolation limits
-		min.lat = min.lat_cover = guideData.bounds.north;
-		max.lon = max.lon_cover = guideData.bounds.east;
-		max.lat = max.lat_cover = guideData.bounds.south;
-		min.lon = min.lon_cover = guideData.bounds.west;
+		min.lat = guideData.bounds.north;
+		max.lon = guideData.bounds.east;
+		max.lat = guideData.bounds.south;
+		min.lon = guideData.bounds.west;
 		// assume an initial position
 		var pos = config.position;
-		pos.lon = (max.lon_cover - min.lon_cover) / 2 + min.lon_cover;
-		pos.lat = (max.lat_cover - min.lat_cover) / 2 + min.lat_cover;
+		pos.lon = (max.lon - min.lon) / 2 + min.lon;
+		pos.lat = (max.lat - min.lat) / 2 + min.lat;
 		// create the canvas
 		this.element = document.createElement("div");
 		this.element.setAttribute("class", "local-area-map-background");
 		this.container.appendChild(this.element);
 		// load the tiles if available
-		if (this.config.tilesUrl) {
-			// align the bounds to the tile grid
-			min.lat_cover = tile2lat(lat2tile(min.lat_cover, 15) - 1, 15);
-			max.lon_cover = tile2long(long2tile(max.lon_cover, 15) + 1, 15);
-			max.lat_cover = tile2lat(lat2tile(max.lat_cover, 15) + 1, 15);
-			min.lon_cover = tile2long(long2tile(min.lon_cover, 15) - 1, 15);
-			// load the tiles
-			this.loadTiles();
-		}
+		if (this.config.tilesUrl) this.loadTiles();
 		// load the map image if available
-		if (this.config.mapUrl) {
-			this.loadBitmap();
-		}
+		if (this.config.mapUrl) this.loadBitmap()
 		// catch window resizes
 		window.addEventListener("resize", this.redraw.bind(this));
 	}
@@ -76,16 +66,11 @@ export class LocalAreaMapBackground {
 		// use the bounds of subsets of walks
 		var pixelsPerLon = image.naturalWidth / (max.lon - min.lon);
 		var pixelsPerLat = image.naturalHeight / (max.lat - min.lat);
-		var offsetWidth = (min.lon - min.lon_cover) * pixelsPerLon;
-		var offsetHeight = (min.lat - min.lat_cover) * pixelsPerLat;
-		var croppedWidth = (max.lon_cover - min.lon_cover) * pixelsPerLon;
-		var croppedHeight = (max.lat_cover - min.lat_cover) * pixelsPerLat;
+		var pixelWidth = (max.lon - min.lon) * pixelsPerLon;
+		var pixelHeight = (max.lat - min.lat) * pixelsPerLat;
 		// set the size of the canvas to the bitmap
-		element.style.width = croppedWidth + "px";
-		element.style.height = croppedHeight + "px";
-		// double up the bitmap to retina size
-		image.style.marginLeft = offsetWidth + "px";
-		image.style.marginTop = offsetHeight + "px";
+		element.style.width = pixelWidth + "px";
+		element.style.height = pixelHeight + "px";
 		// insert image instead of canvas
 		element.appendChild(image);
 		// redraw the component
@@ -95,15 +80,14 @@ export class LocalAreaMapBackground {
 	}
 
 	measureTiles() {
-		// TODO: add offset for the ad hoc boundaries
 		var min = this.config.minimum;
 		var max = this.config.maximum;
 		var pos = this.config.position;
 		// calculate the cols and rows of tiles
-		var minX = long2tile(min.lon_cover, this.config.tilesZoom);
-		var minY = lat2tile(min.lat_cover, this.config.tilesZoom);
-		var maxX = long2tile(max.lon_cover, this.config.tilesZoom);
-		var maxY = lat2tile(max.lat_cover, this.config.tilesZoom);
+		var minX = long2tile(min.lon, this.config.tilesZoom);
+		var minY = lat2tile(min.lat, this.config.tilesZoom);
+		var maxX = long2tile(max.lon, this.config.tilesZoom);
+		var maxY = lat2tile(max.lat, this.config.tilesZoom);
 		// determine the centre tile
 		var state = JSON.parse(localStorage.getItem("local-area-map"));
 		if (state) {
@@ -112,6 +96,11 @@ export class LocalAreaMapBackground {
 		}
 		var posX = long2tile(pos.lon, this.config.tilesZoom);
 		var posY = lat2tile(pos.lat, this.config.tilesZoom);
+		// adjust the boundaries
+		min.lon = tile2long(minX, this.config.tilesZoom);
+		min.lat = tile2lat(minY, this.config.tilesZoom);
+		max.lon = tile2long(maxX, this.config.tilesZoom);
+		max.lat = tile2lat(maxY, this.config.tilesZoom);
 		// return the values
 		console.log({ minX, minY, maxX, maxY, posX, posY });
 		return { minX, minY, maxX, maxY, posX, posY };
@@ -152,13 +141,13 @@ export class LocalAreaMapBackground {
 		var gridWidth = Math.max(coords.maxX - coords.minX, 1);
 		var gridHeight = Math.max(coords.maxY - coords.minY, 1);
 		var tileSize = this.tilesSize;
-		var croppedWidth = gridWidth * tileSize;
-		var croppedHeight = gridHeight * tileSize;
-		var displayWidth = croppedWidth / 2;
-		var displayHeight = croppedHeight / 2;
+		var pixelWidth = gridWidth * tileSize;
+		var pixelHeight = gridHeight * tileSize;
+		var displayWidth = pixelWidth / 2;
+		var displayHeight = pixelHeight / 2;
 		// set the size of the canvas to the correct size
-		element.width = croppedWidth;
-		element.height = croppedHeight;
+		element.width = pixelWidth;
+		element.height = pixelHeight;
 		// double up the bitmap to retina size
 		element.style.width = displayWidth + "px";
 		element.style.height = displayHeight + "px";

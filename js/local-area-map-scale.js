@@ -26,8 +26,8 @@ export class LocalAreaMapScale {
 	redraw() {
 		// how big is the map in kilometres along the bottom
 		var mapSize = this.distance(
-			{ lon: this.config.minimum.lon_cover, lat: this.config.maximum.lat_cover },
-			{ lon: this.config.maximum.lon_cover, lat: this.config.maximum.lat_cover }
+			{ lon: this.config.minimum.lon, lat: this.config.maximum.lat },
+			{ lon: this.config.maximum.lon, lat: this.config.maximum.lat }
 		);
 		// what portion of that is in the container
 		var visible = this.config.container.offsetWidth / this.config.canvasElement.offsetWidth / this.config.position.zoom;
